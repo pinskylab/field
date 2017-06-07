@@ -1,16 +1,14 @@
 ---
 title: "Check GPSSurveys2017.xls for type-os"
 output:
-  html_notebook: default
-  pdf_document:
-    toc: yes
-  
+html_notebook: default
+github_document
 ---
 
 ```{r setup}
 library(tidyverse)
 library(stringr)
-excel_file <- ("../data/GPSSurveys2017.xlsx")
+excel_file <- ("data/GPSSurveys2017.xlsx")
 problem <- data.frame()
 ```
 Import the diveinfo sheet to be checked
