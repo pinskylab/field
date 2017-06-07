@@ -5,7 +5,8 @@ date: "6/7/2017"
 output: github_document
 ---
 
-```{r setup}
+```{r setup, include = FALSE, cache = FALSE}
+knitr::opts_chunk$set(error = TRUE)
 library(tidyverse)
 library(stringr)
 excel_file <- ("data/GPSSurveys2017.xlsx")
