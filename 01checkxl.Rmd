@@ -1,8 +1,8 @@
 ---
 title: "Check GPSSurveys2017.xls for type-os"
-output:
-html_notebook: default
-github_document
+author: "Michelle Stuart"
+date: "6/7/2017"
+output: github_document
 ---
 
 ```{r setup}
