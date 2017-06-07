@@ -1,6 +1,8 @@
 ---
 title: "Trim GPX for QGIS"
-output: html_notebook
+author: "Michelle Stuart"
+date: "6/7/2017"
+output: github_document
 ---
 
 ```{r setup, message=FALSE}
