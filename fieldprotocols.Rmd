@@ -69,6 +69,7 @@ Navigate boat to deployment locataions and drop in the drifters.
 Team backs off until anemone surveyor has a chance to observe.
 
 Anemone surveyor:
+
 1. searches adjacent area for anemone tag (anemone could have moved a few feet since last encounter)
 2. records time, species, size of anemone, tag number if present
 3. watches anemone and counts number of fish and estimate sizes (same procedure regardless of species)
@@ -77,12 +78,14 @@ Anemone surveyor:
 6. Flags anemone with flagging tape that it is ready to be hunted if APCL were present.
 
 Fish catcher:
+
 1. waits for flagging tape to indicate anemone is ready for fish capture, ok to chase fish if they flee the area
 2. catches all fish of desired size range and places in holding vessel adjacent to anemone
 3. can move on to next anemone if anemone surveyor has flagged it
 
 Fish processing team (2 people):
 once the fish catcher has moved to the next anemone, begins processing fish in the holding vessel
+
 1. measure the fish and photograph on the gridded slate
 2. Record size and tail color
 3. Scan for pit tag, if present, 
@@ -93,3 +96,5 @@ once the fish catcher has moved to the next anemone, begins processing fish in t
     3. release fish
 5. Repeat until all fish in the vessel have been processed.
 6. Move on to next holding vessel.
+
+
