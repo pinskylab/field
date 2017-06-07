@@ -89,4 +89,23 @@ once the fish catcher has moved to the next anemone, begins processing fish in t
 5. Repeat until all fish in the vessel have been processed.
 6. Move on to next holding vessel.
 
+## Evening data processing
+
+1. Using forceps or a ziptie to hold the fin clip and tag in place, dump the seawater out of the vial.  Using a squeeze bottle, fill the vial with ethanol (100%) and place in a cardboard sample box.
+
+1. Dunk the ziploc baggies containing GPS units under fresh water, then towel off to dry.  If there is a lot of sea water inside the ziploc, remove the inner aquapac and also dunk that in fresh water, or else towel dry the aquapac and remove the GPS.  Turn the ziplock inside out to dry the interior.
+
+2. Submerge the SeaLife camera in fresh water and remove the lens cap and macro lens.  While submerged, push each button 3 times.  Remove the data plug and rub finger over the gold electrodes.  Immediately remove the camera from the fresh water bath and towel dry the data connectors.
+
+3. Submerge dive watch in fresh water bath and push each button 3 times.
+
+4. If the pit scanner is in the custom housing, remove the pit scanner, re-seal the housing and submerge in fresh water bath.  Push each button 3 times.  If the pit scanner is in the EWA housing, dunk the housing in fresh water, then towel dry.  Remove the aquapac and towel dry. Remove the scanner from the ziploc and inspect for any wetness (there should be none).  
+
+5. Save the day's track on the GPS, then plug it into the computer and transfer the track to the folder corresponding to the GPS unit.  Repeat for each GPS unit.  Remove the batteries and plug them into the charger; begin charging.  Place the rear-doors of the GPS units inside the aquapac bags to prop them open to dry them out.  
+
+6. Plug the pit scanner into its charging cord, start windows on the virtual box, plug in the USB for the pit scanner, select Prolific from the USB options on the virtual box, open the bioterm software, open a connection, turn on text capture, hit shift-G to begin downloading scanned tags.  Tags will save to the Bioterm.txt file on the desktop.  Drag the Bioterm.txt into the network connection to transfer from windows to the mac.  Plug the scanner charger in to begin charging.
+
+7. Make sure the data connection for the camera is completely dry.  Plug the camera into the wall and choose external power from the menu. Turn on the wifi and transfer all new photos to the iphone app. Turn off the camera, turn it back on and select charge from the menu.
+
+
 
