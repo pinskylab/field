@@ -3,47 +3,12 @@
 # ---------------------------------------------
 library(tidyverse)
 library(stringr)
+source("scripts/field_func.R")
 excel_file <- ("data/GPSSurveys2017.xlsx")
 pitfile <- ("data/BioTerm.txt" )
 problem <- data.frame()
 anemcol <- c("text", "text", "text", "text", "text", "text", "text", "text", "text", "text", "text", "text", "text", "text", "text", "text", "text", "text", "text", "text", "text")
 clowncol <- c("text", "text", "text", "text", "text", "text", "text", "text", "text", "text", "text", "text", "text")
-
-# ---------------------------------------------
-#   Define functions
-# ---------------------------------------------
-
-excl <- function(x, y) {
-  excl <- readxl::read_excel(excel_file, sheet = x, col_names = T, col_types = y)
-  return(excl)
-}
-
-comparedives <- function(x) {
-  for (i in 1:length(x)){
-    fishanem <- filter(clown, divenum == x[i]) # for one dive at a time in the fish table
-    anemanem <- filter(anem, divenum == x[i]) # and the anem table
-    good <- filter(fishanem, anemid %in% anemanem$anemid) # find all of the anems that are in the anem table
-    bad <- anti_join(fishanem, good) # and those anems that aren't
-    bad <- filter(bad, anemid != "????") # except for any with an unknown anem 
-    return(bad)
-  }
-}
-
-from_scanner <- function(pitfile) {
-  pit <- read_csv(pitfile, 
-    col_names = c("city", "tagid", "date", "time"), 
-    col_types = cols(
-      city = col_character(),
-      tagid = col_character(),
-      date = col_character(), # have to specify as string  
-      time = col_character() # have to specify as string
-    )
-  )
-  pit <- distinct(pit)
-  pit <- as_tibble(pit) %>% # merge fields into tag number for fish
-    unite(scan, city, tagid, sep = "")
-  return(pit)
-}
 
 # ---------------------------------------------
 #   adjust formatting
