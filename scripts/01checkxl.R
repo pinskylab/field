@@ -7,7 +7,9 @@ source("scripts/field_func.R")
 excel_file <- ("data/GPSSurveys2017.xlsx")
 pitfile <- ("data/BioTerm.txt" )
 problem <- data.frame()
-anemcol <- c("text", "text", "text", "text", "text", "text", "text", "text", "text", "text", "text", "text", "text", "text", "text", "text", "text", "text", "text", "text", "text")
+
+anemcol <- c("text", "text", "text", "text", "date", "text", "text", "text", "text", "text", "text", "text", "text", "text", "text", "text", "text", "text", "text", "text", "text")
+
 clowncol <- c("text", "text", "text", "text", "text", "text", "text", "text", "text", "text", "text", "text", "text")
 
 # ---------------------------------------------
@@ -88,7 +90,7 @@ if (nrow(bad) > 0){
 clowndive <- clown$divenum
 clowndive <- unique(clowndive)
 
-bad <- comparedives(clowndive)
+bad <- compare_dives(clowndive)
 
 if (nrow(bad) > 0){
   bad$typeo <- "anemid in fish table doesn't match anem data table"
