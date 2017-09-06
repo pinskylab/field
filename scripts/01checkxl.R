@@ -22,6 +22,7 @@ anem <- excl("anemones", anemcol)
 names(anem) <- stringr::str_to_lower(names(anem))
 anem <- filter(anem, !is.na(divenum))
 clown <- excl("clownfish", clowncol)
+names(clown) <- stringr::str_to_lower(names(clown))
 clown <- filter(clown, !is.na(divenum))
 
 # ---------------------------------------------
@@ -41,7 +42,7 @@ rm(good, bad)
 #   check the anemones sheet for type-o's
 # ---------------------------------------------
 
-# check anem species 
+# check anem species
 anems <- c("ENQD", "STME", "HECR", "HEMG", "STHD", "HEAR", "MADO", "HEMA", "STGI", "????", "EMPT")
 good <- filter(anem, anemspp %in% anems)
 bad <- anti_join(anem, good)
@@ -98,6 +99,23 @@ if (nrow(bad) > 0){
 problem <- rbind(problem, bad)
 rm(bad, good)
 
+# Are there repeat ID numbers on the clownfish sheet?
+dups <- clown %>% 
+  select(contains("id"), -contains("anemid"), -contains("tagid")) %>% 
+  filter(!is.na(finid)) %>% 
+  group_by(finid) %>% 
+  summarise(count = n()) %>% 
+  filter(count > 1)
+if (nrow(dups) > 0){
+  print("fin_id is repeated on datasheet")
+}
+
+# Are there missing ID numbers on the clownfish sheet?
+missing <- clown %>%
+  select(contains("id"), -contains("anemid"), -contains("tagid")) %>% 
+  filter(!is.na(finid))
+  # which id is missing? # should be integer(0), otherwise will show you the missing id#
+  rep(1:nrow(missing))[!(rep(1:nrow(missing)) %in%  unique(missing$finid))]
 
 # ---------------------------------------------
 #   format pit scanner data
