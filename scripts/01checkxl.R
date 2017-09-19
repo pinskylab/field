@@ -28,7 +28,7 @@ clown <- filter(clown, !is.na(divenum))
 # ---------------------------------------------
 #   check the diveinfo sheet for type-o's
 # ---------------------------------------------
-sites <- c("Palanas", "Wangag", "Magbangon", "Cabatoan", "Caridad Cemetery", "Caridad Proper", "Hicgop South", "Sitio Tugas", "Elementary School", "Sitio Lonas", "San Agustin", "Poroc San Flower", "Poroc Rose", "Visca", "Gabas", "Tamakin Dacot", "Haina", "Sitio Baybayon")
+sites <- c("Palanas", "Wangag", "Magbangon", "Cabatoan", "Caridad Cemetery", "Caridad Proper", "Hicgop", "Hicgop South", "Sitio Tugas", "Elementary School", "Sitio Lonas", "San Agustin", "Poroc San Flower", "Poroc Rose", "Visca", "Gabas", "Tamakin Dacot", "Haina", "Sitio Baybayon")
 good <- filter(dive, site %in% sites)
 bad <- anti_join(dive, good)
 bad <- filter(bad, !is.na(divenum))
