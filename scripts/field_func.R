@@ -15,8 +15,8 @@ library(dplyr)
 #' clowncol <- c("text", "text", "text", "text", "text", "text", "text", "text", "text", "text", "text", "text", "text")
 #' clown <- excl("clownfish", clowncol)
 
-excl <- function(x, y) {
-  excl <- readxl::read_excel(excel_file, sheet = x, col_names = T, col_types = y)
+excl <- function(sheet, columns) {
+  excl <- readxl::read_excel(excel_file, sheet = sheet, col_names = T, col_types = columns)
   return(excl)
 }
 
