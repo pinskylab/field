@@ -24,4 +24,6 @@ for (i in 2:length(file_list)){
 # double check that R knows what it is (should day xml document)
 class(xmlfile)
 
+# testing pull closing
 
+                      
