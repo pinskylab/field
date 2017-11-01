@@ -30,10 +30,10 @@ excl <- function(sheet, columns) {
 #' @examples 
 #' bad <- comparedives(clowndive)
 
-compare_dives <- function(x) {
-  for (i in 1:length(x)){
-    fishanem <- filter(clown, divenum == x[i]) # for one dive at a time in the fish table
-    anemanem <- filter(anem, divenum == x[i]) # and the anem table
+compare_dives <- function(list_of_dive_nums) {
+  for (i in 1:length(list_of_dive_nums)){
+    fishanem <- filter(clown, divenum == list_of_dive_nums[i]) # for one dive at a time in the fish table
+    anemanem <- filter(anem, divenum == list_of_dive_nums[i]) # and the anem table
     good <- filter(fishanem, anemid %in% anemanem$anemid) # find all of the anems that are in the anem table
     bad <- anti_join(fishanem, good) # and those anems that aren't
     bad <- filter(bad, anemid != "????") # except for any with an unknown anem 
