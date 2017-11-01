@@ -180,4 +180,18 @@ index_line <- function(x, y, dat){
   
 }
 
-# ####
+# read_db ####
+#' views all of the fish recaptured at a given site
+#' @export
+#' @name read_db
+#' @author Michelle Stuart
+#' @param x = which db?
+#' @examples 
+#' db <- read_Db("Leyte")
+
+read_db <- function(db_name){
+  
+  db <- src_mysql(dbname = db_name, default.file = path.expand("~/myconfig.cnf"), port = 3306, create = F, host = NULL, user = NULL, password = NULL)
+  return(db)
+}
+  
