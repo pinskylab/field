@@ -30,10 +30,10 @@ excl <- function(x, y) {
 #' @examples 
 #' bad <- comparedives(clowndive)
 
-compare_dives <- function(x) {
-  for (i in 1:length(x)){
-    fishanem <- filter(clown, divenum == x[i]) # for one dive at a time in the fish table
-    anemanem <- filter(anem, divenum == x[i]) # and the anem table
+compare_dives <- function(list_of_dive_nums) {
+  for (i in 1:length(list_of_dive_nums)){
+    fishanem <- filter(clown, divenum == list_of_dive_nums[i]) # for one dive at a time in the fish table
+    anemanem <- filter(anem, divenum == list_of_dive_nums[i]) # and the anem table
     good <- filter(fishanem, anemid %in% anemanem$anemid) # find all of the anems that are in the anem table
     bad <- anti_join(fishanem, good) # and those anems that aren't
     bad <- filter(bad, anemid != "????") # except for any with an unknown anem 
@@ -180,4 +180,18 @@ index_line <- function(x, y, dat){
   
 }
 
-# ####
+# read_db ####
+#' views all of the fish recaptured at a given site
+#' @export
+#' @name read_db
+#' @author Michelle Stuart
+#' @param x = which db?
+#' @examples 
+#' db <- read_Db("Leyte")
+
+read_db <- function(db_name){
+  
+  db <- src_mysql(dbname = db_name, default.file = path.expand("~/myconfig.cnf"), port = 3306, create = F, host = NULL, user = NULL, password = NULL)
+  return(db)
+}
+  
