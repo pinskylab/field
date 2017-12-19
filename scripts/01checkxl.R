@@ -87,7 +87,7 @@ if (nrow(bad) > 0){
 }
 (problem <- rbind(problem, bad))
 
-# Which anems are on the clownfish sheet that are not on the anemone sheet?
+# Are there anems are on the clownfish sheet that are not on the anemone sheet?
 clowndive <- clown$divenum
 clowndive <- unique(clowndive)
 
@@ -114,7 +114,7 @@ if (nrow(dups) > 0){
 missing <- clown %>%
   select(contains("id"), -contains("anemid"), -contains("tagid")) %>% 
   filter(!is.na(finid))
-  # which id is missing? # should be integer(0), otherwise will show you the missing id#
+  # id is missing? # should be integer(0), otherwise will show you the missing id#
   rep(1:nrow(missing))[!(rep(1:nrow(missing)) %in%  unique(missing$finid))]
 
 # ---------------------------------------------
