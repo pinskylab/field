@@ -3,7 +3,7 @@
 # ---------------------------------------------
 library(tidyverse)
 library(stringr)
-source("scripts/field_func.R")
+source("scripts/field_helpers.R")
 excel_file <- ("data/GPSSurveys2017.xlsx")
 pitfile <- ("data/BioTerm.txt" )
 problem <- data.frame()
