@@ -112,9 +112,9 @@ clown <- filter(clown, !is.na(dive_num))
 
 # Are there repeat ID numbers on the clownfish sheet?
 dups <- clown %>% 
-  select(contains("id"), -contains("anemid"), -contains("tagid")) %>% 
-  filter(!is.na(finid)) %>% 
-  group_by(finid) %>% 
+  select(contains("id"), -contains("anem_id"), -contains("tag_id")) %>% 
+  filter(!is.na(fin_id)) %>% 
+  group_by(fin_id) %>% 
   summarise(count = n()) %>% 
   filter(count > 1)
 if (nrow(dups) > 0){
@@ -123,18 +123,50 @@ if (nrow(dups) > 0){
 
 # Are there missing ID numbers on the clownfish sheet?
 missing <- clown %>%
-  select(contains("id"), -contains("anemid"), -contains("tagid")) %>% 
-  filter(!is.na(finid))
+  select(contains("id"), -contains("anem_id"), -contains("tag_id")) %>% 
+  filter(!is.na(fin_id))
   # id is missing? # should be integer(0), otherwise will show you the missing id#
-  rep(1:nrow(missing))[!(rep(1:nrow(missing)) %in%  unique(missing$finid))]
+  rep(1:nrow(missing))[!(rep(1:nrow(missing)) %in%  unique(missing$fin_id))]
+  
+# are there anemones listed at a different site than they were in other years?
+  # setup
+  # leyte <- read_db("Leyte")
+  # anem_db <- leyte %>% 
+  #   tbl("anemones") %>% 
+  #   select(anem_table_id, dive_table_id, anem_id) %>% 
+  #   filter(!is.na(anem_id), anem_id != "-9999") %>% 
+  #   collect()
+  # dive_db <- leyte %>% 
+  #   tbl("diveinfo") %>% 
+  #   select(dive_table_id, site) %>% 
+  #   collect()
+  # anem_db <- left_join(anem_db, dive_db, by = "dive_table_id")
+  # anem_site <- anem_db %>% 
+  #   select(anem_id, site) %>% 
+  #   distinct()
+  # save(anem_site, file="data/anem_site.Rdata")
+  
+  # field use
+  load("data/anem_site.Rdata")
+  
+  # compile a list of anemones with sites from this year
+  anem <- clown %>% 
+    select(dive_num, anem_id) %>% 
+    filter(!is.na(anem_id), anem_id != "-9999") %>% 
+    distinct()
+  new_anem_site <- left_join(anem, dive, by = "dive_num") %>% 
+    select(dive_num, anem_id, site)
+  
+  # compare the two tables # diff should have 0 obs ####
+  diff <- anti_join(new_anem_site, anem_site)
 
 # ---------------------------------------------
 #   format pit scanner data
 # ---------------------------------------------
 pit <- from_scanner(pitfile) # should generate 4 parsing failures
 
-# find only this year
-pit <- filter(pit, substr(date, 7,8) == "17" & substr(date, 1,2) != "16")
+# find only this year - format of date should be 2018-01-01
+pit <- filter(pit, substr(date, 3,4) == "18")
 
 # get rid of test tags
 pit <- filter(pit, substr(scan,1,3) != "989" & substr(scan,1,3) != "999")
