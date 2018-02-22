@@ -18,8 +18,8 @@ dive <- gs_read(entry, ws="diveinfo")
 # dat <- ("~/Downloads/2018_clownfish_data_entry - clownfish.csv")
 
 # include pit tag scanner output
-pitfile <- ("data/BioTerm.txt")
-# pitfile <- ("~/Downloads/BioTerm.txt" )
+# pitfile <- ("data/BioTerm.txt")
+pitfile <- ("~/Downloads/BioTerm.txt" )
 
 problem <- data.frame()
 
@@ -123,10 +123,13 @@ if (nrow(dups) > 0){
 
 # Are there missing ID numbers on the clownfish sheet?
 missing <- clown %>%
-  select(contains("id"), -contains("anem_id"), -contains("tag_id")) %>% 
+  select(contains("id"), -contains("anem_id"), -tag_id, -egg_width) %>% 
   filter(!is.na(fin_id))
   # id is missing? # should be integer(0), otherwise will show you the missing id#
   rep(1:nrow(missing))[!(rep(1:nrow(missing)) %in%  unique(missing$fin_id))]
+  
+  # are there missing anemone_id numbers on the clownfish sheet? - begin with the starting anem number for this field season
+  
   
 # are there anemones listed at a different site than they were in other years?
   # setup
@@ -145,6 +148,11 @@ missing <- clown %>%
   #   select(anem_id, site) %>% 
   #   distinct()
   # save(anem_site, file="data/anem_site.Rdata")
+  # fish_db <- leyte %>% 
+  #   tbl("clownfish") %>% 
+  #   select(fish_table_id, anem_table_id, recap, tag_id) %>% 
+  #   filter(!is.na(tag_id)) %>% 
+  #   collect()
   
   # field use
   load("data/anem_site.Rdata")
@@ -194,3 +202,6 @@ anti_join(pit, tagids, by = c("scan" = "tagid"))
 
 # view any problems that need to be taken care of
 problem
+
+
+# do we have any tags that are scanned as Y and only appear in db once?
