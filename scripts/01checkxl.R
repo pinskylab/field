@@ -23,6 +23,30 @@ pitfile <- ("~/Downloads/BioTerm.txt" )
 
 problem <- data.frame()
 
+# if you haven't downloaded data from the db to be used in the field, do it now (Michelle did for 2018, get a copy from her if you need it)
+# setup
+# leyte <- read_db("Leyte")
+# anem_db <- leyte %>% 
+#   tbl("anemones") %>% 
+#   select(anem_table_id, dive_table_id, anem_id) %>% 
+#   filter(!is.na(anem_id), anem_id != "-9999") %>% 
+#   collect()
+# dive_db <- leyte %>% 
+#   tbl("diveinfo") %>% 
+#   select(dive_table_id, site) %>% 
+#   collect()
+# anem_db <- left_join(anem_db, dive_db, by = "dive_table_id")
+# anem_site <- anem_db %>% 
+#   select(anem_id, site) %>% 
+#   distinct()
+# save(anem_site, file="data/anem_site.Rdata")
+# fish_db <- leyte %>%
+#   tbl("clownfish") %>%
+#   select(fish_table_id, anem_table_id, recap, tag_id) %>%
+#   filter(!is.na(tag_id)) %>%
+#   collect()
+# save(fish_db, file = "data/fish_db.Rdata")
+
 
 # ---------------------------------------------
 #   adjust formatting ####
@@ -110,7 +134,7 @@ clown <- filter(clown, !is.na(dive_num))
 # problem <- rbind(problem, bad)
 # rm(bad, good)
 
-# Are there repeat ID numbers on the clownfish sheet?
+# Are there repeat ID numbers on the clownfish sheet? ####
 dups <- clown %>% 
   select(contains("id"), -contains("anem_id"), -contains("tag_id")) %>% 
   filter(!is.na(fin_id)) %>% 
@@ -121,39 +145,30 @@ if (nrow(dups) > 0){
   print("fin_id is repeated on datasheet")
 }
 
-# Are there missing ID numbers on the clownfish sheet?
-missing <- clown %>%
-  select(contains("id"), -contains("anem_id"), -tag_id, -egg_width) %>% 
+# Are there missing ID numbers on the clownfish sheet? ####
+fins <- clown %>%
+  select(fin_id) %>% 
   filter(!is.na(fin_id))
   # id is missing? # should be integer(0), otherwise will show you the missing id#
-  rep(1:nrow(missing))[!(rep(1:nrow(missing)) %in%  unique(missing$fin_id))]
-  
-  # are there missing anemone_id numbers on the clownfish sheet? - begin with the starting anem number for this field season
-  
-  
-# are there anemones listed at a different site than they were in other years?
-  # setup
-  # leyte <- read_db("Leyte")
-  # anem_db <- leyte %>% 
-  #   tbl("anemones") %>% 
-  #   select(anem_table_id, dive_table_id, anem_id) %>% 
-  #   filter(!is.na(anem_id), anem_id != "-9999") %>% 
-  #   collect()
-  # dive_db <- leyte %>% 
-  #   tbl("diveinfo") %>% 
-  #   select(dive_table_id, site) %>% 
-  #   collect()
-  # anem_db <- left_join(anem_db, dive_db, by = "dive_table_id")
-  # anem_site <- anem_db %>% 
-  #   select(anem_id, site) %>% 
-  #   distinct()
-  # save(anem_site, file="data/anem_site.Rdata")
-  # fish_db <- leyte %>% 
-  #   tbl("clownfish") %>% 
-  #   select(fish_table_id, anem_table_id, recap, tag_id) %>% 
-  #   filter(!is.na(tag_id)) %>% 
-  #   collect()
-  
+x <- c(1:max(fins$fin_id))  # get the highest fin_id so far
+y <- data.frame(x) %>% 
+  rename(fin_id = x) # create a sequence of numbers 1-highest fin_id
+z <- anti_join(y, fins) # show which numbers are missing, 
+
+# should be 0 obs ####
+
+
+  # are there missing anemone_id numbers on the clownfish sheet?  #### - begin with the starting anem number for this field season
+  # gather the used ids
+anem_ids <- clown %>% 
+  select(anem_id) %>% 
+  filter(!is.na(anem_id))
+x <- c(2938:max(anem_ids$anem_id)) #2938 is the first anem_id for 2018
+y <- data.frame(x) %>% 
+  rename(anem_id = x)
+z <- anti_join(y, anem_ids)
+# are there anemones listed at a different site than they were in other years? ####
+
   # field use
   load("data/anem_site.Rdata")
   
@@ -165,16 +180,19 @@ missing <- clown %>%
   new_anem_site <- left_join(anem, dive, by = "dive_num") %>% 
     select(dive_num, anem_id, site)
   
-  # compare the two tables # diff should have 0 obs ####
+  # compare the two tables # diff 
   diff <- anti_join(new_anem_site, anem_site)
 
+  # should have 0 obs ####
+  
+  
 # ---------------------------------------------
 #   format pit scanner data
 # ---------------------------------------------
 pit <- from_scanner(pitfile) # should generate 4 parsing failures
 
-# find only this year - format of date should be 2018-01-01
-pit <- filter(pit, substr(date, 3,4) == "18")
+# find only this year - format of date should be 18-01-01
+pit <- filter(pit, substr(date, 1,2) == "17")
 
 # get rid of test tags
 pit <- filter(pit, substr(scan,1,3) != "989" & substr(scan,1,3) != "999")
@@ -184,24 +202,40 @@ pit <- arrange(pit, date, time)
 #   format tag ids on clownfish data sheet
 # ---------------------------------------------
 clown <- clown %>% 
-  mutate(tagid = stringr::str_replace(tagid, "985_", "985153000")) %>% 
-  mutate(tagid = stringr::str_replace(tagid, "986_", "986112100")) %>% 
-  mutate(tagid = stringr::str_replace(tagid, "982_", "982000411"))
+  mutate(tag_id = stringr::str_replace(tag_id, "985_", "985153000")) %>% 
+  mutate(tag_id = stringr::str_replace(tag_id, "986_", "986112100")) %>% 
+  mutate(tag_id = stringr::str_replace(tag_id, "982_", "982000411"))
 
-tagids <- clown %>% select(contains("tag")) %>% filter(!is.na(tagid))
+tag_ids <- clown %>% select(contains("tag")) %>% filter(!is.na(tag_id))
 
 # ---------------------------------------------
 #   compare scans to datasheets
 # ---------------------------------------------
 
 # What tags are in excel that were not scanned by the scanner (type-os) - should return 0 rows
-anti_join(tagids, pit, by = c("tagid" = "scan"))
+anti_join(tag_ids, pit, by = c("tag_id" = "scan"))
 
 # What tags are in the scanner that are not in excel (type-os) - should return 0 rows
-anti_join(pit, tagids, by = c("scan" = "tagid"))  
+anti_join(pit, tag_ids, by = c("scan" = "tag_id"))  
 
 # view any problems that need to be taken care of
 problem
 
 
-# do we have any tags that are scanned as Y and only appear in db once?
+# do we have any tags that are scanned as Y and only appear once - compare to db?
+load("data/fish_db.Rdata")
+
+# what are past tags?
+db_tags <- fish_db %>% 
+  select(tag_id) 
+
+# which tags were marked as recaptures this field season
+current_tags <- clown %>% 
+  filter(recap == "Y") %>% 
+  select(tag_id)
+
+# are any of these tags not in the db already?
+missing <- anti_join(current_tags, db_tags)
+
+# should be 0 obs ####
+
