@@ -3,11 +3,12 @@
 # ---------------------------------------------
 library(tidyverse) # for pipe functions
 library(lubridate) # for changing time zones
+
 library(stringr) # for combining dates and times into dttm
 source("scripts/readGPXGarmin.R")
 source("scripts/writeGPXGarmin.R")
 source("scripts/field_helpers.R")
-# excel_file <- ("data/anem_gpsSurveys2017.xlsx")
+# excel_file <- ("data/gpsSurveys2017.xlsx")
 
 
 # ---------------------------------------------
@@ -23,22 +24,28 @@ entry <-gs_key(mykey)
 clown <-gs_read(entry, ws='clownfish')
 surv <- gs_read(entry, ws="diveinfo")
 
-# # if the data is in csv
-# surv <- read.csv(file = "data/2018_clownfish_data_entry - diveinfo.csv")
-# clown <- read.csv(file = "data/2018_clownfish_data_entry - clownfish-3.csv")
+# # if the data is in csv - the csvs aren't working with this code - need to convert characters to datte time??
+# surv <- read.csv(file = "data/2018_clownfish_data_entry - diveinfo.csv", stringsAsFactors = F)
+# surv <- surv %>% 
+#   mutate(date = ymd(date), 
+#     start_time = hms(start_time))
+# 
+# clown <- read.csv(file = "data/2018_clownfish_data_entry - clownfish-3.csv", stringsAsFactors = F)
+
 
 names(surv) <- stringr::str_to_lower(names(surv))
 surv <- surv %>% 
   select(dive_num, date, start_time, end_time, pause_start, pause_end, anem_gps)
 
-surv <- surv %>% 
-  separate(start_time, into = c("baddate", "start_time"), sep = " ") %>% #add convert=TRUE to separate to make numeric?
-  separate(end_time, into = c("baddate2", "end_time"), sep = " ") %>%
-separate(pause_start, into = c("baddate4", "pause_start"), sep = " ") %>%
-  separate(pause_end, into = c("baddate5", "pause_end"), sep = " ") %>% 
-  select(-contains("bad")) 
+# # if using excel, there is a weird date attached to the times, don't need if you aren't reading direct from excel.
+# surv <- surv %>% 
+#   separate(start_time, into = c("baddate", "start_time"), sep = " ") %>% #add convert=TRUE to separate to make numeric?
+#   separate(end_time, into = c("baddate2", "end_time"), sep = " ") %>%
+#   separate(pause_start, into = c("baddate4", "pause_start"), sep = " ") %>%
+#   separate(pause_end, into = c("baddate5", "pause_end"), sep = " ") %>% 
+#   select(-contains("bad")) 
 
-# Combine date and time to form a dttm column and set the time zone to PHT, Asia/Manila
+# Combine date and time to form a dttm column and set the time zone to PHT, Asia/Manila 
 surv$start <- str_c(surv$date, surv$start_time, sep = " ")  
 surv$start <- ymd_hms(surv$start)
 surv$start <- force_tz(surv$start, tzone = "Asia/Manila")
@@ -59,20 +66,22 @@ surv$end <- with_tz(surv$end, tzone = "UTC")
 surv$paust <- with_tz(surv$paust, tzone = "UTC")
 surv$pausend <- with_tz(surv$pausend, tzone = "UTC")
 
-# define the list of anem_gps units
-anem_gps <- name_anem_gps()
+# define the list of gps units
+gps <- name_gps()
 
-# determine which anem_gps units have data & remove empties
-anem_gps <- used_anem_gps(anem_gps)
+# determine which gps units have data & remove empties
+gps <- used_gps(gps)
 
-for (l in 1:length(anem_gps)){
-  files <- list.files(path = paste("data/",anem_gps[l], sep = ""), pattern = "*Track*")
+for (l in 1:length(gps)){
+  files <- list.files(path = paste("data/",gps[l], sep = ""), pattern = "*Track*")
   for(i in 1:length(files)){ # for each file
-    dat <- prep_gpx(anem_gps, files) # parse the gpx into useable data
+    
+    # debugonce(prep_gpx)
+    dat <- prep_gpx(gps, files) # parse the gpx into useable data
     
     # which survey started after the gpx and ended before the gpx
     inds <- surv %>% 
-      filter(start >= instart_time & end <= inend_time & !is.na(dive_num))
+      filter(start >= instarttime & end <= inendtime & !is.na(dive_num))
     
     # if none of the surveys fit
     if(nrow(inds) == 0){
@@ -81,7 +90,7 @@ for (l in 1:length(anem_gps)){
       # TODO: change this to warn if a survey doesn't have a GPX instead of a GPX
       # wihtout a survey. 
       inds <- surv %>% 
-        filter((end <= inend_time & end >= instart_time)| (start <= inend_time & start >= instart_time))
+        filter((end <= inendtime & end >= instarttime)| (start <= inendtime & start >= instarttime))
       if(nrow(inds) == 0){
         print(str_c("EVEN WORSE:", files[i], "does not cover even PART of a survey"))
       }
@@ -93,6 +102,7 @@ for (l in 1:length(anem_gps)){
         # output all: not just if this was a dive for collecting APCL
         x <- inds[j,]
         y <- files[i]
+        # debugonce(index_line)
         index_line(x,y, dat)
       }
     }
