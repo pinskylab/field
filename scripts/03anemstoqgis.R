@@ -146,14 +146,22 @@ anem %>%
 fish <- anem %>% 
   filter(!is.na(fish_spp) & fish_spp != "")
 fish$notes <- paste(fish$anem_spp, fish$anem_id, "w/", fish$fish_spp, sep = " ")
-fish <- select(fish, lat, lon, notes, obs_time, site)
+fish <- select(fish, lat, lon, notes, obs_time, site, anem_id)
+# what isn't in fish?
 anem <- anem %>% 
   filter(!is.na(anem_spp) & anem_spp != "" & is.na(fish_spp)) %>% 
   mutate(notes = anem_spp) %>% 
-  select(lat, lon, notes, obs_time, site)
+  select(lat, lon, notes, obs_time, site, anem_id)
 
 out <- rbind(fish,anem)
 out <- distinct(out)
+
+# get each anemone down to one observation - this is just anem_id and lat long, no extra info here
+out <- out %>% 
+  group_by(anem_id) %>% 
+  summarise(mlat = mean(lat, na.rm = TRUE),
+    mlon = mean(lon, na.rm = T))
+
 
 write_csv(out, str_c("data/GPSSurvey_anemlatlon_forQGIS", anem$year[1], Sys.Date(), ".csv", sep = ""))
 
