@@ -193,8 +193,8 @@ excl <- function(x, y) {
 
 compare_dives <- function(list_of_dive_nums) {
   for (i in 1:length(list_of_dive_nums)){
-    fishanem <- filter(clown, divenum == list_of_dive_nums[i]) # for one dive at a time in the fish table
-    anemanem <- filter(anem, divenum == list_of_dive_nums[i]) # and the anem table
+    fishanem <- filter(clown, dive_num == list_of_dive_nums[i]) # for one dive at a time in the fish table
+    anemanem <- filter(anem, dive_num == list_of_dive_nums[i]) # and the anem table
     good <- filter(fishanem, anemid %in% anemanem$anemid) # find all of the anems that are in the anem table
     bad <- anti_join(fishanem, good) # and those anems that aren't
     bad <- filter(bad, anemid != "????") # except for any with an unknown anem 
@@ -313,7 +313,7 @@ index_line <- function(x, y, dat){
         elev = as.character(elev),
         time = as.character(time)
       )
-    writeGPX(filename = str_c("data/gpx_trimmed/GPS", track$unit[1], "_", x$divenum, "_", y, sep=""), outfile = track)
+    writeGPX(filename = str_c("data/gpx_trimmed/GPS", track$unit[1], "_", x$dive_num, "_", y, sep=""), outfile = track)
   }
   # account for a pause if need be
   if(!is.na(x$paust)){
@@ -333,10 +333,15 @@ index_line <- function(x, y, dat){
         elev = as.character(elev),
         time = as.character(time)
       )
+    if (nrow(track2) > 0){
+      # write as two tracks
+      writeGPX(filename = paste("data/gpx_trimmed/GPS", track1$unit[1], "_",x$dive_num, "_", y, '_1.gpx', sep=''), outfile = track1) 
+      writeGPX(filename = paste("data/gpx_trimmed/GPS", track2$unit[1], "_",x$dive_num, "_", y, '_2.gpx', sep=''), outfile = track2)  
+    }else{
+      # debugonce(writeGPX)
+      writeGPX(filename = str_c("data/gpx_trimmed/GPS", track1$unit[1], "_", x$dive_num, "_", y, sep=""), outfile = track1)
+    }
     
-    # write as two tracks
-    writeGPX(filename = paste("data/gpx_trimmed/GPS", track1$unit[1], "_",x$divenum, "_", y, '_1.gpx', sep=''), outfile = track1) 
-    writeGPX(filename = paste("data/gpx_trimmed/GPS", track2$unit[1], "_",x$divenum, "_", y, '_2.gpx', sep=''), outfile = track2)
   }
   
 }
