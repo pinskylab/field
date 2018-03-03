@@ -238,7 +238,7 @@ from_scanner <- function(pitfile) {
 #' gps <- name_gps()
 name_gps <- function() {
   gps <- c()
-  for (i in 1:5){ # because we have 5 gps units
+  for (i in 1:7){ # because we have 7 gps units
     x <- paste("gps", i, sep = "")
     gps <- c(gps, x)
   }
