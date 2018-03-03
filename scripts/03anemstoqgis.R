@@ -5,74 +5,78 @@ library(tidyverse)
 library(lubridate)
 library(stringr)
 source("scripts/field_helpers.R")
-# excel_file <- ("data/GPSSurveys2017.xlsx")
 source("scripts/readGPXGarmin.R")
 
-# anem_col <- c("text", "text", "text", "text", "date", "text", "text", "text", "text", "text", "text", "text", "text", "text", "text", "text", "text", "text", "text", "text", "text")
-# 
-# dive_col <- c("text", "text", "text", "text", "date", "text", "text", "text", "text", "date", "date", "date", "text", "date", "date", "text", "text", "text", "text", "text", "text", "text", "text", "text", "text", "text")
+
 
 
 # ---------------------------------------------
 #   Read data and format
 # ---------------------------------------------
 
+# if data is accessible in google sheets:
+library(googlesheets)
+# gs_auth(new_user = TRUE) # run this if having authorization problems
+mykey <- '1symhfmpQYH8k9dAvp8yV_j_wCTpIT8gO9No4s2OIQXo' # access the file
+entry <-gs_key(mykey)
+clown <-gs_read(entry, ws='clownfish')
+surv <- gs_read(entry, ws="diveinfo")
 
 
-anem <- excl("anemones", anem_col)
+anem <- clown
 names(anem) <- tolower(names(anem))
-anem <- filter(anem, !is.na(divenum))
+anem <- filter(anem, !is.na(dive_num))
 anem <- distinct(anem)
 anem$id <- 1:nrow(anem) # add row numbers so that gpx can be added later (creates 4 rows for each anem)
 
-dive <- excl("diveinfo", dive_col)
+dive <- surv
 names(dive) <- tolower(names(dive))
 dive <- dive %>% 
-  filter(divenum %in% anem$divenum) %>% 
-  select(divenum, date, site, municipality, cover)
+  filter(dive_num %in% anem$dive_num) %>% 
+  select(dive_num, date, site, municipality, cover, anem_gps)
 dive <- distinct(dive)
 
 # ---------------------------------------------
 #   add dates and sites to anems
 # ---------------------------------------------
 
-anem <- left_join(anem, dive, by = "divenum")
+anem <- left_join(anem, dive, by = "dive_num")
 
 # find samples that are lacking an anemone
 (lack <- anem %>% 
-    filter(is.na(anemspp) & !is.na(spp)))
+    filter(is.na(anem_spp) & !is.na(fish_spp)))
 # if this is zero, 
 rm(lack) # if it is not zero, look into what is going on on the data sheet
 
 # remove lines that are not anemones and remove weird dates that excel attaches
 anem <- anem %>% 
-  filter(!is.na(anemspp))
+  filter(!is.na(anem_spp))
 
-# remove weird excel dates
-anem <- anem %>% 
-  separate(obstime, into = c("baddate", "obstime"), sep = " ") %>% 
-  select(-baddate)
+# # remove weird excel dates
+# anem <- anem %>% 
+#   separate(obs_time, into = c("baddate", "obs_time"), sep = " ") %>% 
+#   select(-baddate)
 
 
 # get the date and time info for each anemone
-anem$obstime <- str_c(anem$date, anem$obstime, sep = " ")
-anem$obstime <- ymd_hms(anem$obstime)
-anem$obstime <- force_tz(anem$obstime, tzone = "Asia/Manila")
+anem$obs_time <- str_c(anem$date, anem$obs_time, sep = " ")
+anem$obs_time <- ymd_hms(anem$obs_time)
+anem$obs_time <- force_tz(anem$obs_time, tzone = "Asia/Manila")
 
 # convert to UTC
-anem$obstime <- with_tz(anem$obstime, tzone = "UTC")
+anem$obs_time <- with_tz(anem$obs_time, tzone = "UTC")
 
 # convert GPS to character
-anem$gps <- as.character(anem$gps)
+anem$anem_gps <- as.character(anem$anem_gps)
 
 # split out time components to compare to latlong
 anem <- anem %>% 
-  mutate(month = month(obstime)) %>% 
-  mutate(day = day(obstime)) %>% 
-  mutate(hour = hour(obstime)) %>% 
-  mutate(min = minute(obstime)) %>% 
-  mutate(sec = second(obstime)) %>% 
-  mutate(year = year(obstime))
+  mutate(month = month(obs_time)) %>% 
+  mutate(day = day(obs_time)) %>% 
+  mutate(hour = hour(obs_time)) %>% 
+  mutate(min = minute(obs_time)) %>% 
+  mutate(sec = second(obs_time)) %>% 
+  mutate(year = year(obs_time))
 
 # create table of lat lon data
 # make an empty data frame for later
@@ -105,12 +109,12 @@ gpx$lon <- as.character(gpx$lon)
 gpx$time <- as.character(gpx$time)
 
 # find matches for times to assign lat long - there are more than one set of seconds (sec.y) that match
-anem <- left_join(anem, gpx, by = c("month", "day", "hour", "min", c("gps" = "unit")))
+anem <- left_join(anem, gpx, by = c("month", "day", "hour", "min", c("anem_gps" = "unit")))
 anem$lat <- as.numeric(anem$lat)
-anem$lon <- as.numeric(anem$lon) # need to make decimal 5 digits - why?
+anem$lon <- as.numeric(anem$lon) # need to make decimal 5 digits - why? because that is all the gps can hold
 
 
-#### HERE CAN I USE GROUP BY ID OR OBSTIME AND THEN SUMMARISE TO GET THE MEAN LAT LON OR MIN LAT LON AND CREATE A NEW TABLE WITH ALL COLUMNS BUT ONLY ONE LAT LON PER OBS
+#### HERE CAN I USE GROUP BY ID OR obs_time AND THEN SUMMARISE TO GET THE MEAN LAT LON OR MIN LAT LON AND CREATE A NEW TABLE WITH ALL COLUMNS BUT ONLY ONE LAT LON PER OBS
 
 coord <- anem %>% 
   group_by(id) %>% 
@@ -119,7 +123,7 @@ coord <- anem %>%
 
 
 # drop all of the unneccessary columns from anem and join with the coord
-anem <- select(anem, id, anemspp, anemid, numfish, spp, obstime, site, municipality)
+anem <- select(anem, id, anem_spp, anem_id, fish_spp, obs_time, site)
 
 anem <- left_join(coord, anem, by = "id")
 anem <- rename(anem, lat = mlat, lon = mlon)
@@ -131,28 +135,25 @@ anem <- distinct(anem)
 
 # Sort the data
 anem <- anem %>%
-  arrange(obstime)
+  arrange(obs_time)
 
 # Examine the data
 anem %>% 
-  select(obstime, anemspp, spp, lat, lon, anemid)
+  select(obs_time, anem_spp, fish_spp, lat, lon, anem_id)
 
 # Write out for QGIS (has column headers)
 # add notes based on whether or not the anem has fish on it
 fish <- anem %>% 
-  filter(!is.na(spp) & spp != "")
-fish$notes <- paste(fish$anemspp, fish$anemid, "w/", fish$numfish, fish$spp, sep = " ")
-fish <- select(fish, lat, lon, notes, obstime, site, municipality)
+  filter(!is.na(fish_spp) & fish_spp != "")
+fish$notes <- paste(fish$anem_spp, fish$anem_id, "w/", fish$fish_spp, sep = " ")
+fish <- select(fish, lat, lon, notes, obs_time, site)
 anem <- anem %>% 
-  filter(!is.na(anemspp) & anemspp != "" & is.na(spp)) %>% 
-  mutate(notes = anemspp) %>% 
-  select(lat, lon, notes, obstime, site, municipality)
+  filter(!is.na(anem_spp) & anem_spp != "" & is.na(fish_spp)) %>% 
+  mutate(notes = anem_spp) %>% 
+  select(lat, lon, notes, obs_time, site)
 
 out <- rbind(fish,anem)
 out <- distinct(out)
 
 write_csv(out, str_c("data/GPSSurvey_anemlatlon_forQGIS", anem$year[1], Sys.Date(), ".csv", sep = ""))
-
-
-rm(coord, anem, surv, latlong, out, anems, anem, bad, fish, good, data, dives, gpx, files, folder, header, i, infile, l)
 
