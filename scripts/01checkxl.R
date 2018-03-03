@@ -118,17 +118,17 @@ if (nrow(bad) > 0){
 }
 (problem <- rbind(problem, bad))
 
-# Are there anems are on the clownfish sheet that are not on the anemone sheet? # don't need to do this because not an anem sheet in 2018
-clowndive <- clown$divenum
-clowndive <- unique(clowndive)
-
-bad <- compare_dives(clowndive)
-
-if (nrow(bad) > 0){
-  bad$typeo <- "anemid in fish table doesn't match anem data table"
-}
-problem <- rbind(problem, bad)
-rm(bad, good)
+# # Are there anems are on the clownfish sheet that are not on the anemone sheet? # don't need to do this because not an anem sheet in 2018
+# clowndive <- clown$dive_num
+# clowndive <- unique(clowndive)
+# 
+# bad <- compare_dives(clowndive)
+# 
+# if (nrow(bad) > 0){
+#   bad$typeo <- "anemid in fish table doesn't match anem data table"
+# }
+# problem <- rbind(problem, bad)
+# rm(bad, good)
 
 # Are there repeat ID numbers on the clownfish sheet? ####
 dups <- clown %>% 
@@ -163,16 +163,30 @@ x <- c(2938:max(anem_ids$anem_id)) #2938 is the first anem_id for 2018
 y <- data.frame(x) %>% 
   rename(anem_id = x)
 z <- anti_join(y, anem_ids)
+
 # are there anemones listed at a different site than they were in other years? ####
 
   # field use
-  load("data/anem_site.Rdata")
-  
+anem_db <- read.csv("data/anemones.csv", stringsAsFactors = F) %>% 
+    select(anem_table_id, dive_table_id, anem_id) %>%
+    filter(!is.na(anem_id), anem_id != "-9999") %>%
+  mutate(dive_table_id = as.numeric(dive_table_id)) %>% 
+    collect()
+  dive_db <- read.csv("data/diveinfo.csv", stringsAsFactors = F) %>%
+    select(dive_table_id, site) %>%
+    collect()
+anem_db <- left_join(anem_db, dive_db, by = "dive_table_id")
+anem_site <- anem_db %>%
+  select(anem_id, site) %>%
+  distinct()
+
+
   # compile a list of anemones with sites from this year
   anem <- clown %>% 
     select(dive_num, anem_id) %>% 
     filter(!is.na(anem_id), anem_id != "-9999") %>% 
-    distinct()
+    distinct() %>% 
+    mutate(anem_id = as.character(anem_id))
   new_anem_site <- left_join(anem, dive, by = "dive_num") %>% 
     select(dive_num, anem_id, site)
   
