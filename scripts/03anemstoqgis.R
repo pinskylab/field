@@ -4,18 +4,20 @@
 library(tidyverse)
 library(lubridate)
 library(stringr)
-source("scripts/field_func.R")
-excel_file <- ("data/GPSSurveys2017.xlsx")
+source("scripts/field_helpers.R")
+# excel_file <- ("data/GPSSurveys2017.xlsx")
 source("scripts/readGPXGarmin.R")
 
-anem_col <- c("text", "text", "text", "text", "date", "text", "text", "text", "text", "text", "text", "text", "text", "text", "text", "text", "text", "text", "text", "text", "text")
-
-dive_col <- c("text", "text", "text", "text", "date", "text", "text", "text", "text", "date", "date", "date", "text", "date", "date", "text", "text", "text", "text", "text", "text", "text", "text", "text", "text", "text")
+# anem_col <- c("text", "text", "text", "text", "date", "text", "text", "text", "text", "text", "text", "text", "text", "text", "text", "text", "text", "text", "text", "text", "text")
+# 
+# dive_col <- c("text", "text", "text", "text", "date", "text", "text", "text", "text", "date", "date", "date", "text", "date", "date", "text", "text", "text", "text", "text", "text", "text", "text", "text", "text", "text")
 
 
 # ---------------------------------------------
 #   Read data and format
 # ---------------------------------------------
+
+
 
 anem <- excl("anemones", anem_col)
 names(anem) <- tolower(names(anem))
