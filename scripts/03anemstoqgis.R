@@ -11,13 +11,13 @@ source("scripts/readGPXGarmin.R")
 #   Read data and format
 # ---------------------------------------------
 
-# # if data is accessible in google sheets:
-# library(googlesheets)
-# # gs_auth(new_user = TRUE) # run this if having authorization problems
-# mykey <- '1symhfmpQYH8k9dAvp8yV_j_wCTpIT8gO9No4s2OIQXo' # access the file
-# entry <-gs_key(mykey)
-# clown <-gs_read(entry, ws='clownfish')
-# surv <- gs_read(entry, ws="diveinfo")
+# if data is accessible in google sheets:
+library(googlesheets)
+# gs_auth(new_user = TRUE) # run this if having authorization problems
+mykey <- '1symhfmpQYH8k9dAvp8yV_j_wCTpIT8gO9No4s2OIQXo' # access the file
+entry <-gs_key(mykey)
+clown <-gs_read(entry, ws='clownfish')
+surv <- gs_read(entry, ws="diveinfo")
 
 
 anem <- clown
@@ -41,7 +41,7 @@ anem <- left_join(anem, dive, by = "dive_num")
 
 # find samples that are lacking an anemone
 (lack <- anem %>%
-    filter(is.na(anem_spp) & !is.na(fish_spp)))
+    filter(is.na(anem_id) & !is.na(fish_spp)))
 # if this is zero,
 rm(lack) # if it is not zero, look into what is going on on the data sheet
 
