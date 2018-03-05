@@ -11,13 +11,14 @@ source("scripts/readGPXGarmin.R")
 #   Read data and format
 # ---------------------------------------------
 
-# # if data is accessible in google sheets:
-# library(googlesheets)
-# # gs_auth(new_user = TRUE) # run this if having authorization problems
-# mykey <- '1symhfmpQYH8k9dAvp8yV_j_wCTpIT8gO9No4s2OIQXo' # access the file
-# entry <-gs_key(mykey)
-# clown <-gs_read(entry, ws='clownfish')
-# surv <- gs_read(entry, ws="diveinfo")
+# if data is accessible in google sheets: 
+#ALLISON NOTE: uncommented this section
+library(googlesheets)
+# gs_auth(new_user = TRUE) # run this if having authorization problems
+mykey <- '1symhfmpQYH8k9dAvp8yV_j_wCTpIT8gO9No4s2OIQXo' # access the file
+entry <-gs_key(mykey)
+clown <-gs_read(entry, ws='clownfish')
+surv <- gs_read(entry, ws="diveinfo")
 
 
 anem <- clown
@@ -121,6 +122,9 @@ coord <- anem %>%
 
 # drop all of the unneccessary columns from anem and join with the coord
 anem <- select(anem, id, anem_spp, anem_id, fish_spp, obs_time, site)
+#ALLISON NOTE: anem didn't have year, which was causing issues with write_csv line below
+anem <- select(anem, id, anem_spp, anem_id, fish_spp, obs_time, site, year)
+
 
 anem <- left_join(coord, anem, by = "id")
 anem <- rename(anem, lat = mlat, lon = mlon)
@@ -148,7 +152,7 @@ fish <- select(fish, lat, lon, notes, obs_time, site, anem_id)
 anem <- anem %>%
   filter(!is.na(anem_spp) & anem_spp != "" & is.na(fish_spp)) %>%
   mutate(notes = anem_spp) %>%
-  select(lat, lon, notes, obs_time, site, anem_id)
+  select(lat, lon, notes, obs_time, site, anem_id, year) ##ALLISON NOTE: added year hear b/c was needed in write_csv line below
 
 out <- rbind(fish,anem)
 out <- distinct(out)
