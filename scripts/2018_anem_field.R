@@ -4,31 +4,29 @@
 library(dplyr)
 library(tidyr)
 library(lubridate)
+source("scripts/field_helpers.R")
+source("scripts/readGPXGarmin.R")
+
 # if data is accessible in google sheets:
 library(googlesheets)
 # gs_auth(new_user = TRUE) # run this if having authorization problems
 mykey <- '1symhfmpQYH8k9dAvp8yV_j_wCTpIT8gO9No4s2OIQXo' # access the file
 entry <-gs_key(mykey)
 
-
-
-
 # dive data ####
 dive <- gs_read(entry, ws="diveinfo") %>% 
   select(dive_num, date, contains("gps"))
-
 
 # anemone data ####
 
 anem <-gs_read(entry, ws='clownfish') %>% 
   filter(!is.na(anem_id), 
     anem_id != "NULL") %>% 
-  mutate(dive_table_id = as.integer(dive_table_id)) %>% 
   separate(obs_time, into = c("hour", "minute", "second"), sep = ":") %>% 
   mutate(gpx_hour = as.numeric(hour) - 8) %>% 
   mutate(minute = as.numeric(minute))
 
-anem <- left_join(anem, dive, by = "dive_table_id")
+anem <- left_join(anem, dive, by = "dive_num")
 rm(dive)
 
 # fix date if gpx hour is less than 0 ####
@@ -59,18 +57,34 @@ if (nrow(test) > 0){
 rm(test)
 
 anem <- anem %>% 
-  mutate(gpx_date = date(gpx_date), 
-    gps = as.integer(gps))
+  mutate(gpx_date = date(gpx_date))
 
-# find the lat long for this anem ####
-lat <- read.csv(stringsAsFactors = F, file = "data/GPX.csv") %>% 
-  filter(grepl("2017", time)) %>% 
+# lat lon data ####
+
+# make an empty data frame for later
+gpx <- data.frame()
+
+# define the list of gps units
+gps <- name_gps()
+
+# determine which gps units have data & remove empties
+gps <- used_gps(gps)
+
+for (l in 1:length(gps)){
+  files <- list.files(path = paste("data/",gps[l], sep = ""), pattern = "*Track*")
+  for(i in 1:length(files)){ # for each file
+    dat <- prep_gpx(gps, files) # parse the gpx into useable data
+    gpx <- rbind(gpx, dat)
+  }
+}
+
+# adjust formatting
+lat <- gpx %>% 
   mutate(gpx_date = date(time)) %>% 
-  filter(gpx_date %in% anem$gpx_date) %>% 
   mutate(gpx_hour = hour(time), 
     minute = minute(time),
     second = second(time)) %>% 
-  select(-time, -second)
+  select(-time, -second, -elev)
 
 # average the 4 observations per minute into one observation ####
 mean_lat <- lat %>%
