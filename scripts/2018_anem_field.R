@@ -109,5 +109,5 @@ anem <- anem %>%
   summarize(lat = mean(lat),
     lon = mean(lon))
 
-write.csv(anem, paste("data/GPSSurvey_anemlatlon_forQGIS_2018_", Sys.Date(), ".csv", sep = ""))
+write.csv(anem, paste("data/GPSSurvey_anemlatlon_forQGIS", Sys.Date(), ".csv", sep = ""))
   
