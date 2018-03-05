@@ -1,0 +1,13 @@
+dive_num,obs_time,depth,anem_spp,anem_dia,old_anem_id,anem_id,egg_width,egg_height,ziplock,fish_spp,size,color,recap,tag_id,fin_id,notes
+1,13:43,3.7,HECR,35,-9999,2309,0,0,1,APCL,5.1,YR,N,,1,
+1,13:43,3.7,HECR,35,-9999,2309,0,0,,APPE,5,,,,,
+1,13:43,3.7,HECR,35,-9999,2309,0,0,,APPE,5,,,,,
+1,14:17,,,,,,,,,,,,,,,marker bottle
+1,14:44,,,,,,,,,,,,,,,HOBO 10637793 -> 10527842
+1,15:03,,,,,,,,,,,,,,,tilt current meter
+1,15:08,,,,,,,,,,,,,,,HOBO 10637792 -> 10718540
+1,13:50,3.7,HECR,35,-9999,2309,0,0,1,APCL,9.9,YP,Y,985_375761,,no photo
+1,13:54,3.7,HECR,35,-9999,2309,0,0,2,APCL,9.8,O,Y,985_404043,,
+1,14:23,3.9,HECR,30,,2310,,,2,APCL,9.3,YP,Y,985_403302,,"no photo,  did not check for eggs"
+1,14:26,3.9,HECR,30,,2310,,,2,APCL,5.9,YP,N,,2,blurry photo
+1,14:35,3.9,HECR,30,,2310,,,4,APCL,9.1,O,Y,982_818573,,
