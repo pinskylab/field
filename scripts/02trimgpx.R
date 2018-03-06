@@ -32,39 +32,27 @@ surv <- gs_read(entry, ws="diveinfo")
 # 
 # clown <- read.csv(file = "data/2018_clownfish_data_entry - clownfish-3.csv", stringsAsFactors = F)
 
-
 names(surv) <- stringr::str_to_lower(names(surv))
-surv <- surv %>% 
-  select(dive_num, date, start_time, end_time, pause_start, pause_end, anem_gps)
-
-# # if using excel, there is a weird date attached to the times, don't need if you aren't reading direct from excel.
-# surv <- surv %>% 
-#   separate(start_time, into = c("baddate", "start_time"), sep = " ") %>% #add convert=TRUE to separate to make numeric?
-#   separate(end_time, into = c("baddate2", "end_time"), sep = " ") %>%
-#   separate(pause_start, into = c("baddate4", "pause_start"), sep = " ") %>%
-#   separate(pause_end, into = c("baddate5", "pause_end"), sep = " ") %>% 
-#   select(-contains("bad")) 
 
 # Combine date and time to form a dttm column and set the time zone to PHT, Asia/Manila 
-surv$start <- str_c(surv$date, surv$start_time, sep = " ")  
-surv$start <- ymd_hms(surv$start)
-surv$start <- force_tz(surv$start, tzone = "Asia/Manila")
-surv$end <- str_c(surv$date, surv$end_time, sep = " ")  
-surv$end <- ymd_hms(surv$end)
-surv$end <- force_tz(surv$end, tzone = "Asia/Manila")
-surv$paust <- str_c(surv$date, surv$pause_start, sep = " ")  
-surv$paust <- ymd_hms(surv$paust)
-surv$paust <- force_tz(surv$paust, tzone = "Asia/Manila")
-surv$pausend <- str_c(surv$date, surv$pause_end, sep = " ")  
-surv$pausend <- ymd_hms(surv$pausend)
-surv$pausend <- force_tz(surv$pausend, tzone = "Asia/Manila")
+surv <- surv %>% 
+  select(dive_num, date, start_time, end_time, pause_start, pause_end, gps) %>% 
+  mutate(start = force_tz(ymd_hms(str_c(date, start_time, sep = " ")),tzone = "Asia/Manila"), 
+    end = force_tz(ymd_hms(str_c(date, end_time, sep = " ")), tzone = "Asia/Manila"), 
+    paust = force_tz(ymd_hms(str_c(date, pause_start, sep = " ")), tzone = "Asia/Manila"), 
+    pausend = force_tz(ymd_hms(str_c(date, pause_end, sep = " ")), tzone = "Asia/Manila")
+    )
 
+# there is a failed to parse message for the pauses that are NA but it doesn't seem to change the output in a negative way so can be ignored. ####
+    
+# Change time zone to UTC ####
+surv <- surv %>% 
+  mutate(start = with_tz(start, tzone = "UTC"), 
+    end = with_tz(end, tzone = "UTC"), 
+    paust = with_tz(paust, tzone = "UTC"),
+    pausend = with_tz(pausend, tzone = "UTC"))
 
-# Change time zone to UTC 
-surv$start <- with_tz(surv$start, tzone = "UTC")
-surv$end <- with_tz(surv$end, tzone = "UTC")
-surv$paust <- with_tz(surv$paust, tzone = "UTC")
-surv$pausend <- with_tz(surv$pausend, tzone = "UTC")
+# This change to UTC should also change the date if necessary ####
 
 # define the list of gps units
 gps <- name_gps()
