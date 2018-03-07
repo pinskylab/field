@@ -207,7 +207,10 @@ anem_site <- anem_db %>%
     select(dive_num, anem_id, site)
   
   # compare the two tables # diff 
-  diff <- left_join(new_anem_site, anem_site, by = "anem_id")
+  diff <- left_join(new_anem_site, anem_site, by = "anem_id") 
+  
+  # %>% 
+    # filter(old_site != site)
 
   # should have 0 obs ####
   
