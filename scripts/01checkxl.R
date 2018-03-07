@@ -241,7 +241,7 @@ tag_ids <- clown %>% select(contains("tag")) %>% filter(!is.na(tag_id))
 # What tags are in the spreadsheet that were not scanned by the scanner (type-os) - should return 0 rows
 anti_join(tag_ids, pit, by = c("tag_id" = "scan"))
 
-# What tags are in the scanner that are not in excel (type-os) - should return 0 rows
+# What tags are in the scanner that are not in spreadsheet (type-os) - should return 0 rows
 anti_join(pit, tag_ids, by = c("scan" = "tag_id"))  
 
 # view any problems that need to be taken care of
