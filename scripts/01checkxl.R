@@ -13,6 +13,17 @@ entry <-gs_key(mykey)
 clown <-gs_read(entry, ws='clownfish')
 dive <- gs_read(entry, ws="diveinfo")
 
+# save data in case network connection is lost
+clownfilename <- str_c("data/clown_", Sys.time(), ".Rdata", sep = "")
+divefilename <- str_c("data/dive_", Sys.time(), ".Rdata", sep = "")
+save(clown, file = clownfilename)
+save(dive, file = divefilename)
+
+# # load data from saved if network connection is lost
+# # THIS HAS TO BE MANUALLY UPDATED WITH MOST CURRENT VERSION OF SAVED FILE  - COULD WRITE CODE TO FIND AND LOAD THE MOST CURRENT VERSION ####
+# load(file = "data/clown_2018-03-07 17:25:56.Rdata")
+# load(file = "data/dive_2018-03-07 17:25:56.Rdata")
+
 
 # # if data is via csv
 # clown <- read.csv(stringsAsFactors = F, file = "data/2018_clownfish_data_entry - clownfish.csv")
@@ -207,7 +218,7 @@ anem_site <- anem_db %>%
 pit <- from_scanner(pitfile) # should generate 4 parsing failures
 
 # find only this year - format of date should be 18-01-01
-pit <- filter(pit, substr(date, 1,2) == "17")
+pit <- filter(pit, substr(date, 1,2) == "18")
 
 # get rid of test tags
 pit <- filter(pit, substr(scan,1,3) != "989" & substr(scan,1,3) != "999")
@@ -227,7 +238,7 @@ tag_ids <- clown %>% select(contains("tag")) %>% filter(!is.na(tag_id))
 #   compare scans to datasheets
 # ---------------------------------------------
 
-# What tags are in excel that were not scanned by the scanner (type-os) - should return 0 rows
+# What tags are in the spreadsheet that were not scanned by the scanner (type-os) - should return 0 rows
 anti_join(tag_ids, pit, by = c("tag_id" = "scan"))
 
 # What tags are in the scanner that are not in excel (type-os) - should return 0 rows
