@@ -31,11 +31,7 @@ save(dive, file = divefilename)
 
 # include pit tag scanner output
 pitfile <- ("data/BioTerm.txt")
- <<<<<<< HEAD
-#pitfile <- ("~/Downloads/BioTerm.txt" )
- =======
-# pitfile <- ("~/Downloads/BioTerm.txt" )
- >>>>>>> 121b1f393af5b0e8d5e5a1bacf4572429b3d5871
+ # pitfile <- ("~/Downloads/BioTerm.txt" )
 
 problem <- data.frame()
 
@@ -226,15 +222,12 @@ anem_site <- anem_db %>%
 # ---------------------------------------------
 pit <- from_scanner(pitfile) # should generate 4 parsing failures #AD note - only generated 3 parsing errors... but still produces 3 columns "scan", "date", "time"
 
-<<<<<<< HEAD
+
 # find only this year - format of date should be 18-01-01 #AD note - date is actually formatted 01/01/16
 #pit <- filter(pit, substr(date, 1,2) == "18")
 pit <- filter(pit, substr(date, 7,8) == "18" | substr(date, 1,2) == "18") #placement of year changes throughout!
 
-=======
-# find only this year - format of date should be 18-01-01
-pit <- filter(pit, substr(date, 1,2) == "18")
->>>>>>> 121b1f393af5b0e8d5e5a1bacf4572429b3d5871
+
 
 # get rid of test tags
 pit <- filter(pit, substr(scan,1,3) != "989" & substr(scan,1,3) != "999")
@@ -244,9 +237,10 @@ pit <- arrange(pit, date, time)
 #   format tag ids on clownfish data sheet
 # ---------------------------------------------
 clown <- clown %>% 
-  mutate(tag_id = stringr::str_replace(tag_id, "985_", "985153000")) %>% 
-  mutate(tag_id = stringr::str_replace(tag_id, "986_", "986112100")) %>% 
-  mutate(tag_id = stringr::str_replace(tag_id, "982_", "982000411"))
+  mutate(tag_id = stringr::str_replace(tag_id, "9851_", "985153000")) %>% 
+  mutate(tag_id = stringr::str_replace(tag_id, "9861_", "986112100")) %>% 
+  mutate(tag_id = stringr::str_replace(tag_id, "9820_", "982000411")) %>% 
+  mutate(tag_id = stringr::str_replace(tag_id, "9821_", "982126052")) 
 
 tag_ids <- clown %>% select(contains("tag")) %>% filter(!is.na(tag_id))
 
