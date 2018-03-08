@@ -18,8 +18,8 @@ dive <- gs_read(entry, ws="diveinfo")
 # dat <- ("~/Downloads/2018_clownfish_data_entry - clownfish.csv")
 
 # include pit tag scanner output
-# pitfile <- ("data/BioTerm.txt")
-pitfile <- ("~/Downloads/BioTerm.txt" )
+pitfile <- ("data/BioTerm.txt")
+#pitfile <- ("~/Downloads/BioTerm.txt" )
 
 problem <- data.frame()
 
@@ -181,6 +181,7 @@ anem_site <- anem_db %>%
   distinct()
 
 
+
   # compile a list of anemones with sites from this year
   anem <- clown %>% 
     select(dive_num, anem_id) %>% 
@@ -199,10 +200,11 @@ anem_site <- anem_db %>%
 # ---------------------------------------------
 #   format pit scanner data
 # ---------------------------------------------
-pit <- from_scanner(pitfile) # should generate 4 parsing failures
+pit <- from_scanner(pitfile) # should generate 4 parsing failures #AD note - only generated 3 parsing errors... but still produces 3 columns "scan", "date", "time"
 
-# find only this year - format of date should be 18-01-01
-pit <- filter(pit, substr(date, 1,2) == "17")
+# find only this year - format of date should be 18-01-01 #AD note - date is actually formatted 01/01/16
+#pit <- filter(pit, substr(date, 1,2) == "18")
+pit <- filter(pit, substr(date, 7,8) == "18")
 
 # get rid of test tags
 pit <- filter(pit, substr(scan,1,3) != "989" & substr(scan,1,3) != "999")
