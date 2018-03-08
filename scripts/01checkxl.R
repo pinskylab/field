@@ -13,13 +13,29 @@ entry <-gs_key(mykey)
 clown <-gs_read(entry, ws='clownfish')
 dive <- gs_read(entry, ws="diveinfo")
 
+# save data in case network connection is lost
+clownfilename <- str_c("data/clown_", Sys.time(), ".Rdata", sep = "")
+divefilename <- str_c("data/dive_", Sys.time(), ".Rdata", sep = "")
+save(clown, file = clownfilename)
+save(dive, file = divefilename)
+
+# # load data from saved if network connection is lost
+# # THIS HAS TO BE MANUALLY UPDATED WITH MOST CURRENT VERSION OF SAVED FILE  - COULD WRITE CODE TO FIND AND LOAD THE MOST CURRENT VERSION ####
+# load(file = "data/clown_2018-03-07 17:25:56.Rdata")
+# load(file = "data/dive_2018-03-07 17:25:56.Rdata")
+
 
 # # if data is via csv
-# dat <- ("~/Downloads/2018_clownfish_data_entry - clownfish.csv")
+# clown <- read.csv(stringsAsFactors = F, file = "data/2018_clownfish_data_entry - clownfish.csv")
+# dive <- read.csv(stringsAsFactors = F, file = "data/2018_clownfish_data_entry - diveinfo.csv")
 
 # include pit tag scanner output
 pitfile <- ("data/BioTerm.txt")
+<<<<<<< HEAD
 #pitfile <- ("~/Downloads/BioTerm.txt" )
+=======
+# pitfile <- ("~/Downloads/BioTerm.txt" )
+>>>>>>> 121b1f393af5b0e8d5e5a1bacf4572429b3d5871
 
 problem <- data.frame()
 
@@ -70,39 +86,26 @@ if (nrow(bad) > 0){
 rm(good, bad)
 
 # ---------------------------------------------
-#   check the anemones sheet for type-o's #### don't need to do this because using data validation in the spreadsheet
+#   check the clownfish sheet for type-o's
 # ---------------------------------------------
-
 # check anem species
 anems <- c("ENQD", "STME", "HECR", "HEMG", "STHD", "HEAR", "MADO", "HEMA", "STGI", "????", "EMPT")
-good <- filter(anem, anemspp %in% anems)
-bad <- anti_join(anem, good)
-bad <- filter(bad, !is.na(anemspp))
+good <- filter(clown, anem_spp %in% anems)
+bad <- anti_join(clown, good)
+bad <- bad %>% 
+  filter(!is.na(anem_spp), anem_spp != "")
 if (nrow(bad) > 0){
   bad$typeo <- "fix anem spp on anem table"
 }
 (problem <- rbind(problem, bad))
 rm(good, bad)
 
+# Check fish species #### don't need to do this because using data validation in the spreadsheet
 # check fish species
 fish <- c("APCL", "APOC", "APPE", "APSE", "APFR", "APPO", "APTH", "PRBI", "NA")
-good <- filter(anem, spp %in% fish)
-bad <- anti_join(anem, good) # wait for the next line before checking bad
-bad <- filter(bad, !is.na(spp))
-if (nrow(bad) > 0){
-  bad$typeo <- "fix fish spp on anem table"
-}
-(problem <- rbind(problem, bad))
-rm(good, bad)
-
-# ---------------------------------------------
-#   check the clownfish sheet for type-o's
-# ---------------------------------------------
-
-# Check fish species #### don't need to do this because using data validation in the spreadsheet
-good <- filter(clown, spp %in% fish)
+good <- filter(clown, fish_spp %in% fish)
 bad <- anti_join(clown, good)
-bad <- filter(bad, !is.na(spp))
+bad <- filter(bad, !is.na(fish_spp), fish_spp != "")
 if (nrow(bad) > 0){
   bad$typeo <- "fix fish spp on fish table"
 }
@@ -112,13 +115,26 @@ if (nrow(bad) > 0){
 colors <- c("YE", "O", "YR", "YP", "Y", "W", "WR", "WP", "BW", "B")
 good <- filter(clown, color %in% colors)
 bad <- anti_join(clown, good)
-bad <- filter(bad, !is.na(color))
+bad <- filter(bad, !is.na(color), color != "")
 if (nrow(bad) > 0){
   bad$typeo <- "fix tail color on fish table"
 }
 (problem <- rbind(problem, bad))
 
-# # Are there anems are on the clownfish sheet that are not on the anemone sheet? # don't need to do this because not an anem sheet in 2018
+# are there anemone observations with ids that are missing data?
+# incmplt_anem <- clown %>% 
+#   filter(!is.na(anem_spp), anem_spp != "", # anemone spp is present
+#     is.na(anem_dia) | is.na(anem_id) | is.na(depth)) # but is missing info
+
+# make sure the info isn't somewhere else
+# multi <- clown %>% 
+#   filter(anem_id %in% incmplt_anem$anem_id) %>% 
+#   group_by(anem_id) %>% 
+#   summarise(num_obs = n()) %>% 
+#   filter(num_obs > 1)
+
+
+
 # clowndive <- clown$dive_num
 # clowndive <- unique(clowndive)
 # 
@@ -158,41 +174,48 @@ z <- anti_join(y, fins) # show which numbers are missing,
   # gather the used ids
 anem_ids <- clown %>% 
   select(anem_id) %>% 
-  filter(!is.na(anem_id))
+  filter(!is.na(anem_id), anem_id != "") %>%
+  distinct()
+
 x <- c(2938:max(anem_ids$anem_id)) #2938 is the first anem_id for 2018
 y <- data.frame(x) %>% 
-  rename(anem_id = x)
+  rename(anem_id = x) 
+
 z <- anti_join(y, anem_ids)
 
-# are there anemones listed at a different site than they were in other years? ####
+# are there anemones listed at a different site than they were in other years? Don't include new tags - in 2018 2938 was first tag ####
 
   # field use
 anem_db <- read.csv("data/anemones.csv", stringsAsFactors = F) %>% 
     select(anem_table_id, dive_table_id, anem_id) %>%
-    filter(!is.na(anem_id), anem_id != "-9999") %>%
-  mutate(dive_table_id = as.numeric(dive_table_id)) %>% 
-    collect()
+    filter(!is.na(anem_id), anem_id != "-9999", anem_id != "NULL") %>%
+  mutate(dive_table_id = as.numeric(dive_table_id))
+
   dive_db <- read.csv("data/diveinfo.csv", stringsAsFactors = F) %>%
-    select(dive_table_id, site) %>%
-    collect()
+    select(dive_table_id, site) 
+  
 anem_db <- left_join(anem_db, dive_db, by = "dive_table_id")
 anem_site <- anem_db %>%
   select(anem_id, site) %>%
-  distinct()
+  distinct() %>% 
+  rename(old_site = site)
 
 
 
   # compile a list of anemones with sites from this year
   anem <- clown %>% 
     select(dive_num, anem_id) %>% 
-    filter(!is.na(anem_id), anem_id != "-9999") %>% 
+    filter(!is.na(anem_id), anem_id != "-9999", anem_id < 2938) %>% 
     distinct() %>% 
     mutate(anem_id = as.character(anem_id))
   new_anem_site <- left_join(anem, dive, by = "dive_num") %>% 
     select(dive_num, anem_id, site)
   
   # compare the two tables # diff 
-  diff <- anti_join(new_anem_site, anem_site)
+  diff <- left_join(new_anem_site, anem_site, by = "anem_id") 
+  
+  # %>% 
+    # filter(old_site != site)
 
   # should have 0 obs ####
   
@@ -202,9 +225,14 @@ anem_site <- anem_db %>%
 # ---------------------------------------------
 pit <- from_scanner(pitfile) # should generate 4 parsing failures #AD note - only generated 3 parsing errors... but still produces 3 columns "scan", "date", "time"
 
+<<<<<<< HEAD
 # find only this year - format of date should be 18-01-01 #AD note - date is actually formatted 01/01/16
 #pit <- filter(pit, substr(date, 1,2) == "18")
 pit <- filter(pit, substr(date, 7,8) == "18")
+=======
+# find only this year - format of date should be 18-01-01
+pit <- filter(pit, substr(date, 1,2) == "18")
+>>>>>>> 121b1f393af5b0e8d5e5a1bacf4572429b3d5871
 
 # get rid of test tags
 pit <- filter(pit, substr(scan,1,3) != "989" & substr(scan,1,3) != "999")
@@ -224,10 +252,10 @@ tag_ids <- clown %>% select(contains("tag")) %>% filter(!is.na(tag_id))
 #   compare scans to datasheets
 # ---------------------------------------------
 
-# What tags are in excel that were not scanned by the scanner (type-os) - should return 0 rows
+# What tags are in the spreadsheet that were not scanned by the scanner (type-os) - should return 0 rows
 anti_join(tag_ids, pit, by = c("tag_id" = "scan"))
 
-# What tags are in the scanner that are not in excel (type-os) - should return 0 rows
+# What tags are in the scanner that are not in spreadsheet (type-os) - should return 0 rows
 anti_join(pit, tag_ids, by = c("scan" = "tag_id"))  
 
 # view any problems that need to be taken care of

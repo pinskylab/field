@@ -35,7 +35,7 @@ dive <- surv
 names(dive) <- tolower(names(dive))
 dive <- dive %>%
   filter(dive_num %in% anem$dive_num) %>%
-  select(dive_num, date, site, municipality, cover, anem_gps)
+  select(dive_num, date, site, municipality, cover, gps)
 dive <- distinct(dive)
 
 # ---------------------------------------------
@@ -69,7 +69,7 @@ anem$obs_time <- force_tz(anem$obs_time, tzone = "Asia/Manila")
 anem$obs_time <- with_tz(anem$obs_time, tzone = "UTC")
 
 # convert GPS to character
-anem$anem_gps <- as.character(anem$anem_gps)
+anem$gps <- as.character(anem$gps)
 
 # split out time components to compare to latlong
 anem <- anem %>%
@@ -111,7 +111,7 @@ gpx$lon <- as.character(gpx$lon)
 gpx$time <- as.character(gpx$time)
 
 # find matches for times to assign lat long - there are more than one set of seconds (sec.y) that match
-anem <- left_join(anem, gpx, by = c("month", "day", "hour", "min", c("anem_gps" = "unit")))
+anem <- left_join(anem, gpx, by = c("month", "day", "hour", "min", c("gps" = "unit")))
 anem$lat <- as.numeric(anem$lat)
 anem$lon <- as.numeric(anem$lon) # need to make decimal 5 digits - why? because that is all the gps can hold
 
@@ -127,7 +127,7 @@ coord <- anem %>%
 # drop all of the unneccessary columns from anem and join with the coord
 anem <- select(anem, id, anem_spp, anem_id, fish_spp, obs_time, site)
 #ALLISON NOTE: anem didn't have year, which was causing issues with write_csv line below
-anem <- select(anem, id, anem_spp, anem_id, fish_spp, obs_time, site, year)
+anem <- select(anem, id, anem_spp, anem_id, fish_spp, obs_time, site)
 
 
 anem <- left_join(coord, anem, by = "id")
@@ -148,15 +148,15 @@ anem %>%
 
 # Write out for QGIS (has column headers)
 # add notes based on whether or not the anem has fish on it
-fish <- anem %>%
-  filter(!is.na(fish_spp) & fish_spp != "")
-fish$notes <- paste(fish$anem_spp, fish$anem_id, "w/", fish$fish_spp, sep = " ")
-fish <- select(fish, lat, lon, notes, obs_time, site, anem_id)
-# what isn't in fish?
+# fish <- anem %>%
+#   filter(!is.na(fish_spp) & fish_spp != "")
+# fish$notes <- paste(fish$anem_spp, fish$anem_id, "w/", fish$fish_spp, sep = " ")
+# fish <- select(fish, lat, lon, notes, obs_time, site, anem_id)
+# # what isn't in fish?
 anem <- anem %>%
   filter(!is.na(anem_spp) & anem_spp != "" & is.na(fish_spp)) %>%
   mutate(notes = anem_spp) %>%
-  select(lat, lon, notes, obs_time, site, anem_id, year) ##ALLISON NOTE: added year hear b/c was needed in write_csv line below
+  select(lat, lon, notes, obs_time, site, anem_id) ##ALLISON NOTE: added year hear b/c was needed in write_csv line below ## MRS - removed year because it doesn't exist in the table?
 
 out <- rbind(fish,anem)
 out <- distinct(out)
@@ -168,5 +168,7 @@ out <- out %>%
     mlon = mean(lon, na.rm = T))
 
 
-write_csv(out, str_c("data/GPSSurvey_anemlatlon_forQGIS", anem$year[1], Sys.Date(), ".csv", sep = ""))
+write_csv(out, str_c("data/GPSSurvey_anemlatlon_forQGIS_2018_", Sys.Date(), ".csv", sep = ""))
+
+### MOVE THIS CSV TO THE PHILS_GIS_R DATA DIRECTORY ###
 
