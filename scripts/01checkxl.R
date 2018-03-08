@@ -31,11 +31,11 @@ save(dive, file = divefilename)
 
 # include pit tag scanner output
 pitfile <- ("data/BioTerm.txt")
-<<<<<<< HEAD
+ <<<<<<< HEAD
 #pitfile <- ("~/Downloads/BioTerm.txt" )
-=======
+ =======
 # pitfile <- ("~/Downloads/BioTerm.txt" )
->>>>>>> 121b1f393af5b0e8d5e5a1bacf4572429b3d5871
+ >>>>>>> 121b1f393af5b0e8d5e5a1bacf4572429b3d5871
 
 problem <- data.frame()
 
@@ -212,7 +212,8 @@ anem_site <- anem_db %>%
     select(dive_num, anem_id, site)
   
   # compare the two tables # diff 
-  diff <- left_join(new_anem_site, anem_site, by = "anem_id") 
+  diff <- left_join(new_anem_site, anem_site, by = "anem_id") %>% 
+    filter(old_site != site | is.na(site)) #need to figure out how to get filter to keep nas, bad work-around at the moment
   
   # %>% 
     # filter(old_site != site)
@@ -228,7 +229,8 @@ pit <- from_scanner(pitfile) # should generate 4 parsing failures #AD note - onl
 <<<<<<< HEAD
 # find only this year - format of date should be 18-01-01 #AD note - date is actually formatted 01/01/16
 #pit <- filter(pit, substr(date, 1,2) == "18")
-pit <- filter(pit, substr(date, 7,8) == "18")
+pit <- filter(pit, substr(date, 7,8) == "18" | substr(date, 1,2) == "18") #placement of year changes throughout!
+
 =======
 # find only this year - format of date should be 18-01-01
 pit <- filter(pit, substr(date, 1,2) == "18")
