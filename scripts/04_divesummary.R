@@ -61,6 +61,14 @@ tissue <- samp %>%
   summarize(fins=n())
 divetot <- left_join(divetot, tissue, by = "dive_num")
 
+# how many fish are captured (clipped + recaptures) - this will miss fish that were captured by escaped before getting a clip...
+captured <- samp %>% 
+  filter(recap == "Y" | !is.na(fin_id)) %>% #filter out recaps or fish with fin-clips (looks like it handles recap fish with a clip correctly by only counting them once)
+  group_by(dive_num) %>%
+  summarise(captured = n())
+
+divetot <- left_join(divetot, captured, by = "dive_num")
+
 # # how many fish were captured - doesn't work for 2018 because we guessed sizes of uncaptured fish
 # cap <- samp %>% filter(!is.na(size)) %>% 
 #     group_by(dive_num) %>% 
@@ -74,16 +82,25 @@ recap <- samp %>%
   summarise(recap = n())
 
 divetot <- left_join(divetot, recap, by = "dive_num") 
+
+# what about the (few) fish that are recaptures but also get a fin clip?
+clipped_recaps <- samp %>%
+  filter(recap == "Y" & !is.na(fin_id)) %>%
+  group_by(dive_num) %>%
+  summarise(clipped_recaps = n())
+
+divetot <- left_join(divetot, clipped_recaps, by = "dive_num")
+
 divetot <- divetot %>% 
-  select(dive_num, site, observed, captured, fins, recap) %>% 
+  select(dive_num, site, observed, captured, fins, recap, clipped_recaps) %>% 
   distinct()
 
 # # are any captured more than observed?
-# bad <- filter(divetot, captured > observed) # the one at visca is ok because it is ????
+bad <- filter(divetot, captured > observed) # the one at visca is ok because it is ????
 # # are there more fin clips than captured?
-# bad <- filter(divetot, fins > captured)
+bad <- filter(divetot, fins > captured)
 # # are there ore recaps than captured?
-# bad <- filter(divetot, recap > captured)
+bad <- filter(divetot, recap > captured)
 
 # Fish per site -----------------------------------------------------------
 
@@ -105,11 +122,11 @@ fins <- tissue %>%
 
 sitetot <- left_join(sitetot, fins, by = "site")
 
-# how many fish were captured
-cap <- tissue %>% 
-  filter(!is.na(size)) %>% 
-  group_by(site) %>% 
-  summarize(captured = n())
+# how many fish were captured (recaps + fish with fin clips) - this does miss fish that were caught but escaped before getting a fin clip
+cap <- fishobs %>% 
+  filter(recap == "Y" | !is.na(fin_id)) %>% #filter out recaps or fish with fin-clips (looks like it handles recap fish with a clip correctly by only counting them once)
+  group_by(site) %>%
+  summarise(captured = n())
 
 sitetot <- left_join(sitetot, cap, by = "site")
 
@@ -120,8 +137,17 @@ recap <- tissue %>%
   summarize(recap = n())
 
 sitetot <- left_join(sitetot, recap, by = "site") 
+
+# how many recap fish got clips? (b/c missing genetic data)
+clipped_Rs <- fishobs %>%
+  filter(recap == "Y" & !is.na(fin_id)) %>%
+  group_by(site) %>%
+  summarise(clipped_recaps = n())
+
+sitetot <- left_join(sitetot, clipped_Rs, by = "site")
+
 sitetot <- sitetot %>% 
-  select(site, observed, captured, finclip, recap)
+  select(site, observed, captured, finclip, recap, clipped_recaps)
 
 # are any captured more than observed?
 bad <- filter(sitetot, captured > observed) # the one at visca is ok because it is ????
@@ -129,6 +155,28 @@ bad <- filter(sitetot, captured > observed) # the one at visca is ok because it 
 bad <- filter(sitetot, finclip > captured)
 # are there ore recaps than captured?
 bad <- filter(sitetot, recap > captured)
+
+# do the divetot numbers match up with the sitetot? 
+divetotsum <- divetot %>% #calculate site totals from divetot, can compare to sitetot
+  group_by(site) %>% 
+  summarise(site_observed = sum(observed), site_captured = sum(captured, na.rm = TRUE), site_fins = sum(fins, na.rm = TRUE), site_recap = sum(recap, na.rm = TRUE), site_clipped_recaps = sum(clipped_recaps, na.rm = TRUE))
+
+# #are the observed fish per site the same? (will print message if so, if no message all is good) #doesn't quite work b/c doesn't compare NAs (in sitetot) to 0s (in divetotsum) correctly
+# for (i in 1:length(divetotsum$site)) {
+#   site_name <- divetotsum$site[i]
+#   if (divetotsum$site_observed[i] != sitetot$observed[i]) {
+#     print(site_name, "fish observed mismatch", sep = " ")
+#   }
+#   if (divetotsum$site_fins[i] != sitetot$finclip[i]) {
+#     print(site_name, "fin clips mismatch", sep = " ")
+#   }
+#   if (divetotsum$site_recap[i] != sitetot$recap[i]) {
+#     print(site_name, "recaps mismatch", sep = " ")
+#   }
+#   if (divetotsum$site_clipped_recaps[i] != sitetot$clipped_recaps[i]) {
+#     print(site_name, "fin clips mismatch", sep = " ")
+#   }
+# }
 
 View(sitetot)
 # save(sitetot, file = "data/sitetot.Rdata")
