@@ -224,8 +224,8 @@ pit <- from_scanner(pitfile) # should generate 4 parsing failures #AD note - onl
 
 
 # find only this year - format of date should be 18-01-01 #AD note - date is actually formatted 01/01/16
-#pit <- filter(pit, substr(date, 1,2) == "18")
-pit <- filter(pit, substr(date, 7,8) == "18" | substr(date, 1,2) == "18") #placement of year changes throughout!
+pit <- filter(pit, substr(date, 1,2) == "18")
+#pit <- filter(pit, substr(date, 7,8) == "18" | substr(date, 1,2) == "18") #placement of year changes throughout! but looks like the 4 with 7,8 position are repeated with 1,2 too
 
 
 
