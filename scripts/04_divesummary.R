@@ -8,7 +8,6 @@ library(stringr)
 source("scripts/field_helpers.R")
 
 # if data is accessible in google sheets: 
-#ALLISON NOTE: uncommented this section
 library(googlesheets)
 # gs_auth(new_user = TRUE) # run this if having authorization problems
 mykey <- '1symhfmpQYH8k9dAvp8yV_j_wCTpIT8gO9No4s2OIQXo' # access the file
@@ -34,70 +33,73 @@ fish <- filter(fish, !is.na(fish_spp)) %>%
   distinct()
 
 # get dive info
-site <- readxl::read_excel(excel_file, sheet = "diveinfo", col_names=TRUE)
+site <- dive
 names(site) <- stringr::str_to_lower(names(site))
-site <- site %>% filter(!is.na(divenum)) %>% select(divenum, site) %>% distinct()
+site <- site %>% 
+  filter(!is.na(dive_num)) %>% 
+  select(dive_num, site) %>% 
+  distinct()
 
 # fish processing info from clownfish survey
-samp <- readxl::read_excel(excel_file, sheet = "clownfish", col_names = TRUE, na = "")   
+samp <- clown
 names(samp) <- stringr::str_to_lower(names(samp))
-samp <- filter(samp, !is.na(divenum) & gps == 4)
+samp <- filter(samp, !is.na(dive_num))
 
 # make a table of observed fish
 divetot <- fish %>%
-  group_by(divenum) %>% 
-  filter(!is.na(numfish) & spp == "APCL") %>% 
-  summarise(observed = sum(numfish))
+  group_by(dive_num) %>% 
+  filter(fish_spp == "APCL") %>% 
+  summarise(observed = n())
 
 # add the site to the table
-divetot <- left_join(divetot, site, by = "divenum")
+divetot <- left_join(divetot, site, by = "dive_num")
 
 # how many tissue samples were collected?  
 tissue <- samp %>% 
-  filter(!is.na(finid)) %>% 
-  group_by(divenum) %>% 
+  filter(!is.na(fin_id)) %>% 
+  group_by(dive_num) %>% 
   summarize(fins=n())
-divetot <- left_join(divetot, tissue, by = "divenum")
+divetot <- left_join(divetot, tissue, by = "dive_num")
 
-# how many fish were captured
-cap <- samp %>% filter(!is.na(size)) %>% 
-    group_by(divenum) %>% 
-    summarise(captured = n())
-divetot <- left_join(divetot, cap, by = "divenum")
+# # how many fish were captured - doesn't work for 2018 because we guessed sizes of uncaptured fish
+# cap <- samp %>% filter(!is.na(size)) %>% 
+#     group_by(dive_num) %>% 
+#     summarise(captured = n())
+# divetot <- left_join(divetot, cap, by = "dive_num")
 
 # how many fish were recaptures?
 recap <- samp %>% 
   filter(recap == "Y") %>% 
-  group_by(divenum) %>% 
+  group_by(dive_num) %>% 
   summarise(recap = n())
 
-divetot <- left_join(divetot, recap, by = "divenum") 
+divetot <- left_join(divetot, recap, by = "dive_num") 
 divetot <- divetot %>% 
-  select(divenum, site, observed, captured, fins, recap) %>% 
+  select(dive_num, site, observed, captured, fins, recap) %>% 
   distinct()
 
-# are any captured more than observed?
-bad <- filter(divetot, captured > observed) # the one at visca is ok because it is ????
-# are there more fin clips than captured?
-bad <- filter(divetot, fins > captured)
-# are there ore recaps than captured?
-bad <- filter(divetot, recap > captured)
+# # are any captured more than observed?
+# bad <- filter(divetot, captured > observed) # the one at visca is ok because it is ????
+# # are there more fin clips than captured?
+# bad <- filter(divetot, fins > captured)
+# # are there ore recaps than captured?
+# bad <- filter(divetot, recap > captured)
 
 # Fish per site -----------------------------------------------------------
 
 # fish observed by site
-fishobs <- left_join(fish, site, by = "divenum") %>% 
+fishobs <- left_join(fish, site, by = "dive_num") %>% 
   distinct()
 sitetot <- fishobs %>% 
-  filter(spp == "APCL", !is.na(numfish)) %>% 
+  filter(fish_spp == "APCL") %>% 
   group_by(site) %>% 
-  summarise(observed = sum(numfish))
+  summarise(observed = n())
 
 # how many tissue samples were collected?  
-tissue <- left_join(samp, site, by = "divenum") %>% 
+tissue <- left_join(samp, site, by = "dive_num") %>% 
   distinct()
 fins <- tissue %>% 
-  filter(!is.na(finid)) %>% 
+  filter(!is.na(fin_id)) %>% 
   group_by(site) %>% 
   summarise(finclip = n())
 
@@ -129,4 +131,6 @@ bad <- filter(sitetot, finclip > captured)
 bad <- filter(sitetot, recap > captured)
 
 View(sitetot)
+# save(sitetot, file = "data/sitetot.Rdata")
 View(divetot)
+# save(divetot, file = "data/divetot.Rdata")
