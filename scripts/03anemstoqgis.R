@@ -13,10 +13,7 @@ source("scripts/readGPXGarmin.R")
 
 <<<<<<< HEAD
 # if data is accessible in google sheets: 
-#ALLISON NOTE: uncommented this section
-=======
-# if data is accessible in google sheets:
->>>>>>> eb297f8a0d1ba69587b77989e1949041949c833a
+
 library(googlesheets)
 # gs_auth(new_user = TRUE) # run this if having authorization problems
 mykey <- '1symhfmpQYH8k9dAvp8yV_j_wCTpIT8gO9No4s2OIQXo' # access the file
