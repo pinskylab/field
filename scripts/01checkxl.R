@@ -264,6 +264,7 @@ anti_join(tag_ids, pit, by = c("tag_id" = "scan"))
 
 # What tags are in the scanner that are not in spreadsheet (type-os) - should return 0 rows
 anti_join(pit, tag_ids, by = c("scan" = "tag_id"))  
+# 697391 and 818456 were scanned but the fish escaped before they could be tagged so as of 2018-03-11 they have not been used yet.
 
 # view any problems that need to be taken care of
 problem
