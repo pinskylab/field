@@ -152,8 +152,8 @@ anem <- anem %>%
   filter(!is.na(anem_spp) & anem_spp != "" & is.na(fish_spp)) %>%
   mutate(notes = anem_spp) %>%
   select(lat, lon, notes, obs_time, site, anem_id) ##ALLISON NOTE: added year hear b/c was needed in write_csv line below ## MRS - removed year because it doesn't exist in the table?
-
-out <- rbind(fish,anem)
+out <- anem
+# out <- rbind(fish,anem)
 out <- distinct(out)
 
 # get each anemone down to one observation - this is just anem_id and lat long, no extra info here
