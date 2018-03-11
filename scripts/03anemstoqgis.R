@@ -41,7 +41,10 @@ anem <- left_join(anem, dive, by = "dive_num")
 
 # find samples that are lacking an anemone
 (lack <- anem %>%
-    filter(is.na(anem_id) & !is.na(fish_spp)))
+    filter(is.na(anem_id) & !is.na(fish_spp)) %>% 
+    select(dive_num, obs_time, tag_id, fin_id, notes) %>% 
+    filter(!is.na(fin_id) | !is.na(tag_id)))
+
 # if this is zero,
 rm(lack) # if it is not zero, look into what is going on on the data sheet
 
