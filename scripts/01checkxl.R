@@ -21,8 +21,8 @@ save(dive, file = divefilename)
 
 # # load data from saved if network connection is lost
 # # THIS HAS TO BE MANUALLY UPDATED WITH MOST CURRENT VERSION OF SAVED FILE  - COULD WRITE CODE TO FIND AND LOAD THE MOST CURRENT VERSION ####
-# load(file = "data/clown_2018-03-07 17:25:56.Rdata")
-# load(file = "data/dive_2018-03-07 17:25:56.Rdata")
+# load(file = "data/clown_2018-03-10 20:34:58.Rdata")
+# load(file = "data/dive_2018-03-10 20:34:59.Rdata")
 
 
 # # if data is via csv
@@ -242,6 +242,15 @@ clown <- clown %>%
   mutate(tag_id = stringr::str_replace(tag_id, "9820_", "982000411")) %>% 
   mutate(tag_id = stringr::str_replace(tag_id, "9821_", "982126052")) 
 
+clown <- clown %>% # fix 6 digit entries
+  mutate(tag_id = stringr::str_replace(tag_id, "^95", "98212605295"), 
+    tag_id = stringr::str_replace(tag_id, "^818", "982126052818"), 
+    tag_id = stringr::str_replace(tag_id, "^1", "9861121001"),
+    tag_id = stringr::str_replace(tag_id, "^3", "9851530003"),
+    tag_id = stringr::str_replace(tag_id, "^4", "9851530004"),
+    tag_id = stringr::str_replace(tag_id, "^6", "9820004116"))
+    
+
 tag_ids <- clown %>% select(contains("tag")) %>% filter(!is.na(tag_id))
 
 # ---------------------------------------------
@@ -275,3 +284,6 @@ missing <- anti_join(current_tags, db_tags)
 
 # should be 0 obs ####
 
+
+# are there any anemones that lack a description?
+# fish anems - vs anem obs
