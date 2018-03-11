@@ -244,11 +244,13 @@ clown <- clown %>%
 
 clown <- clown %>% # fix 6 digit entries
   mutate(tag_id = stringr::str_replace(tag_id, "^95", "98212605295"), 
-    tag_id = stringr::str_replace(tag_id, "^818", "982126052818"), 
+    #tag_id = stringr::str_replace(tag_id, "^818", "982126052818"), 
+    tag_id = stringr::str_replace(tag_id, "^818", "982000411818"),
     tag_id = stringr::str_replace(tag_id, "^1", "9861121001"),
     tag_id = stringr::str_replace(tag_id, "^3", "9851530003"),
     tag_id = stringr::str_replace(tag_id, "^4", "9851530004"),
-    tag_id = stringr::str_replace(tag_id, "^6", "9820004116"))
+    tag_id = stringr::str_replace(tag_id, "^6", "9821260526"))
+    #tag_id = stringr::str_replace(tag_id, "^6", "9820004116"))
     
 
 tag_ids <- clown %>% select(contains("tag")) %>% filter(!is.na(tag_id))
