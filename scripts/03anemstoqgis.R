@@ -12,10 +12,6 @@ source("scripts/readGPXGarmin.R")
 # ---------------------------------------------
 
 # if data is accessible in google sheets: 
-<<<<<<< HEAD
-=======
-
->>>>>>> d59ff591b3a1227fb6a424c154cc8a40d9df0e8a
 library(googlesheets)
 # gs_auth(new_user = TRUE) # run this if having authorization problems
 mykey <- '1symhfmpQYH8k9dAvp8yV_j_wCTpIT8gO9No4s2OIQXo' # access the file
