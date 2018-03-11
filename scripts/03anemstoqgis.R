@@ -12,10 +12,6 @@ source("scripts/readGPXGarmin.R")
 # ---------------------------------------------
 
 # if data is accessible in google sheets: 
-<<<<<<< HEAD
-=======
-
->>>>>>> d59ff591b3a1227fb6a424c154cc8a40d9df0e8a
 library(googlesheets)
 # gs_auth(new_user = TRUE) # run this if having authorization problems
 mykey <- '1symhfmpQYH8k9dAvp8yV_j_wCTpIT8gO9No4s2OIQXo' # access the file
@@ -156,8 +152,8 @@ anem <- anem %>%
   filter(!is.na(anem_spp) & anem_spp != "" & is.na(fish_spp)) %>%
   mutate(notes = anem_spp) %>%
   select(lat, lon, notes, obs_time, site, anem_id) ##ALLISON NOTE: added year hear b/c was needed in write_csv line below ## MRS - removed year because it doesn't exist in the table?
-
-out <- rbind(fish,anem)
+out <- anem
+# out <- rbind(fish,anem)
 out <- distinct(out)
 
 # get each anemone down to one observation - this is just anem_id and lat long, no extra info here
