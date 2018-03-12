@@ -361,4 +361,96 @@ read_db <- function(db_name){
   return(db)
 }
 
+#' Read GPX Garmin
+#'
+#' This function allows you to read gpx files generated on the Garmin GPS unit.
+#' @param filename What gpx file would you like to read?
+#' @keywords gpx
+#' @export
+#' @examples
+#' readGPXGarmin(filename)
+
+# Read a .gpx file and return a dataframe of time, lat, long, and elevation, as well as the header data
+# Treats the file as only one trkseg (and may not work on files with multiple trksegs)
+
+readGPXGarmin <- function(filename){
+  library(stringr)
+  
+  infile <- readr::read_file(filename) 
+  
+  # infile <- readLines(filename, warn=FALSE)
+  lines <- strsplit(infile, split="<trkpt", fixed=TRUE)[[1]] # split into each point
+  header <- lines[1]
+  lines <- lines[2:length(lines)]
+  
+  
+  lat <- lines %>% 
+    str_extract_all("lat=\"\\d+\\.\\d+\"") %>% 
+    str_replace_all("lat=\"","") %>% 
+    str_replace_all("\"", "")
+  
+  lon <- lines %>% 
+    str_extract_all("lon=\"\\d+\\.\\d+\"") %>% 
+    str_replace_all("lon=\"","") %>% 
+    str_replace_all("\"", "")
+  
+  
+  elev <- lines %>% 
+    str_extract_all("ele>\\d+\\.\\d+") %>% 
+    str_replace_all("ele>","")
+  
+  
+  time <- lines %>% 
+    str_extract_all("time>\\d+-\\d+-\\d+T\\d+:\\d+:\\d+Z</time></t") %>% 
+    str_replace_all("time>", "") %>% 
+    str_replace_all("T", " ") %>% 
+    str_replace_all("Z</</t", "")
+  
+  
+  data <- data.frame(lat, lon, elev, time)
+  
+  
+  out <- list(header=header, data=data)
+  
+  return(out)
+}
+
+#' Write GPX
+#'
+#' This function allows you to write GPX format given the header and the data from readGPXGarmin_2013_06_01.R
+#' @param outfile The file name of the output
+#' @param filename The name of the input
+#' @keywords gpx
+#' @export
+#' @examples
+#' writeGPX(outfile, filename)
+
+
+writeGPX = function(outfile, filename){
+  con = file(filename, open = 'wt')
+  cat(header, file=con) # write the same header
+  
+  # add the data
+  
+  for(i in 1:nrow(outfile)){
+    cat('<trkpt lat="', file=con)
+    cat(outfile$lat[i], file=con)
+    cat('" lon="', file=con)
+    cat(outfile$lon[i], file=con)
+    cat('"><ele>', file=con)
+    cat(outfile$elev[i], file=con)
+    cat('</ele><time>', file=con)
+    cat(str_sub(outfile$time[i],1,10), file=con)
+    cat("T", file = con)
+    cat(str_sub(outfile$time[i],12,19), file=con)
+    cat('Z</time></trkpt>', file=con)
+  }
+  
+  # finish up the file
+  cat('</trkseg></trk></gpx>', file=con)
+  
+  # close up
+  close(con)
+}
+
 
