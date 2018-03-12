@@ -17,7 +17,12 @@ library(googlesheets)
 mykey <- '1symhfmpQYH8k9dAvp8yV_j_wCTpIT8gO9No4s2OIQXo' # access the file
 entry <-gs_key(mykey)
 clown <-gs_read(entry, ws='clownfish')
-surv <- gs_read(entry, ws="diveinfo")
+dive <- gs_read(entry, ws="diveinfo")
+
+# # load data from saved if network connection is lost
+# # THIS HAS TO BE MANUALLY UPDATED WITH MOST CURRENT VERSION OF SAVED FILE  - COULD WRITE CODE TO FIND AND LOAD THE MOST CURRENT VERSION ####
+# load(file = "data/clown_2018-03-12 21:13:51.Rdata")
+# load(file = "data/dive_2018-03-12 21:13:52.Rdata")
 
 
 anem <- clown
@@ -26,7 +31,7 @@ anem <- filter(anem, !is.na(dive_num))
 anem <- distinct(anem)
 anem$id <- 1:nrow(anem) # add row numbers so that gpx can be added later (creates 4 rows for each anem)
 
-dive <- surv
+
 names(dive) <- tolower(names(dive))
 dive <- dive %>%
   filter(dive_num %in% anem$dive_num) %>%
