@@ -59,5 +59,7 @@ map_path <- "/Users/macair/Philippines_Docs/field/data/leyte_map.png"
 include_graphics(map_path)
 
 
+#' <!--highlight the line below within the comments starting at rmarkdown and ending at the ) and command-enter to generate the report -->
+#' 
 #' <!-- rmarkdown::render('/Users/macair/Philippines_Docs/field/scripts/BFAR_generator_inprogress.R') -->
 
