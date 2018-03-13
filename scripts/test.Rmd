@@ -1,0 +1,63 @@
+---
+title: "test"
+author: "Michelle Stuart"
+date: "3/13/2018"
+output: word_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+source("scripts/04_divesummary.R")
+library(dplyr)
+library(knitr)
+```
+
+### Introduction ###
+Under the project “Effects of low population density on reef fish connectivity,” we conducted fieldwork and collected anemonefish samples in Leyte from May 1 to June 16, 2016. The primary objective was to collect tissue samples (fin clips) from individuals of Amphiprion clarkii at each of 13 locations. In this season, we sampled 13 sites in Albuera and Bay Bay City, Leyte.
+We are now conducting laboratory analysis of the collected specimens. We are using genotyping-by-sequencing methods to genotype each specimen at a number of Single Nucleotide Polymorphisms (SNPs). This will allow us to match parents and offspring and to identify when we recapture the same fish in a different field season. This information will allow us to determine whether small populations are self-persistent or whether they rely on surrounding populations for persistence (network persistence).
+
+### Inventory ###
+Note: All samples are tissue clips from the caudal fin.
+
+```{r echo=FALSE}
+# generate a table for the bfar report
+# in the field, load 2017 dive data from saved database
+dive <- read.csv("data/diveinfo.csv", stringsAsFactors = F) %>% 
+  filter(grepl("2017", date)) %>% 
+  select(dive_table_id, site, municipality)
+# in the field, load the anemones that correspond to those dives
+anem <- read.csv("data/anemones.csv", stringsAsFactors = F) %>% 
+  filter(dive_table_id %in% dive$dive_table_id) %>% 
+  select(anem_table_id, dive_table_id) %>% 
+  mutate(dive_table_id = as.integer(dive_table_id), 
+    anem_table_id = as.integer(anem_table_id))
+anem <- left_join(anem, dive, by = "dive_table_id")
+rm(dive)
+# in the field, load the fish that correspond to those anemones
+fish <- read.csv("data/clownfish.csv", stringsAsFactors = F) %>% 
+  filter(anem_table_id %in% anem$anem_table_id, 
+    !is.na(fin_id), fin_id != "NULL") %>% 
+  select(fish_table_id, anem_table_id, fin_id)
+fish <- left_join(fish, anem, by = "anem_table_id")
+rm(anem)
+bfar <- fish %>% 
+  group_by(site, municipality) %>%
+  summarise(samples = n())
+bfar <- bfar %>% 
+  mutate(Province = "Leyte") %>% 
+  rename(Municipality = municipality, 
+    Site = site, 
+    Samples = samples) %>% 
+  select(Province, Municipality, Site, Samples)
+  ```
+```{r echo = F, results = 'asis'}
+knitr::kable(bfar)
+```
+
+### Map of the sites on the west coast of Leyte ###
+```map_path <- "data/leyte_map.png"
+include_graphics(map_path)
+```
