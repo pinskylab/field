@@ -15,6 +15,8 @@ entry <-gs_key(mykey)
 clown <-gs_read(entry, ws='clownfish')
 dive <- gs_read(entry, ws="diveinfo")
 
+
+
 # save data in case network connection is lost
 clownfilename <- str_c("data/clown_", Sys.time(), ".Rdata", sep = "")
 divefilename <- str_c("data/dive_", Sys.time(), ".Rdata", sep = "")
@@ -23,8 +25,8 @@ save(dive, file = divefilename)
 
 # # load data from saved if network connection is lost
 # # THIS HAS TO BE MANUALLY UPDATED WITH MOST CURRENT VERSION OF SAVED FILE  - COULD WRITE CODE TO FIND AND LOAD THE MOST CURRENT VERSION ####
-# load(file = "data/clown_2018-03-07 17:25:56.Rdata")
-# load(file = "data/dive_2018-03-07 17:25:56.Rdata")
+# load(file = "data/clown_2018-03-12 21:13:51.Rdata")
+# load(file = "data/dive_2018-03-12 21:13:52.Rdata")
 
 # fish observation info from anem survey
 fish <- clown
@@ -102,7 +104,7 @@ bad <- filter(divetot, fins > captured)
 # # are there ore recaps than captured?
 bad <- filter(divetot, recap > captured)
 
-# Fish per site -----------------------------------------------------------
+# Fish per site -----
 
 # fish observed by site
 fishobs <- left_join(fish, site, by = "dive_num") %>% 
@@ -182,3 +184,8 @@ View(sitetot)
 # save(sitetot, file = "data/sitetot.Rdata")
 View(divetot)
 # save(divetot, file = "data/divetot.Rdata")
+
+total_cap <- sitetot %>% 
+  summarise(sum_obs = sum(observed), 
+    sum_cap = sum(finclip) + sum(recap, na.rm = T), 
+    sum_finclip = sum(finclip), sum_recap = sum(recap, na.rm = T))
