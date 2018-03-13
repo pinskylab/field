@@ -10,9 +10,6 @@ source("scripts/readGPXGarmin.R")
 # fix 2017 anem data
 anem <- read.csv(stringsAsFactors = F, file="data/anemones.csv")
 
-
-
-
 # ---------------------------------------------
 #   Read data and format
 # ---------------------------------------------
