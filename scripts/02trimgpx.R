@@ -26,8 +26,8 @@ dive <- gs_read(entry, ws="diveinfo")
 
 # # load data from saved if network connection is lost
 # # THIS HAS TO BE MANUALLY UPDATED WITH MOST CURRENT VERSION OF SAVED FILE  - COULD WRITE CODE TO FIND AND LOAD THE MOST CURRENT VERSION ####
-# load(file = "data/clown_2018-03-12 21:13:51.Rdata")
-# load(file = "data/dive_2018-03-12 21:13:52.Rdata")
+# load(file = "data/clown_2018-03-14 20:46:44.Rdata")
+# load(file = "data/dive_2018-03-14 20:46:44.Rdata")
 
 surv <- dive
 
