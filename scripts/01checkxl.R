@@ -265,7 +265,7 @@ clown %>%
 
 # What tags are in the scanner that are not in spreadsheet (type-os) - should return 0 rows
 anti_join(pit, tag_ids, by = c("scan" = "tag_id"))  
-# 818456 was scanned but the fish escaped before they could be tagged so as of 2018-03-12  it has not been used yet.
+# 818456 was scanned but the fish escaped before they could be tagged so as of 2018-03-14  it has not been used yet.
 
 # view any problems that need to be taken care of
 problem
