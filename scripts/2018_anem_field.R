@@ -18,7 +18,6 @@ dive <- gs_read(entry, ws="diveinfo") %>%
   select(dive_num, date, contains("gps"))
 
 # anemone data ####
-
 anem <-gs_read(entry, ws='clownfish') %>% 
   filter(!is.na(anem_id), 
     anem_id != "NULL") %>% 
@@ -96,14 +95,14 @@ mean_lat <- lat %>%
 # turn gps column in mean_lat into integer so can merge with anem
 mean_lat$gps <- as.integer(mean_lat$gps)
 
-# add to anem observations
+# add to anem observations - RIGHT NOW, AFTER ROW 16, LAT/LON ARE NA - WHY? - b/c they have gpx hour 1,2,3,5,6 and the gps have 4-7
 anem <- left_join(anem, mean_lat, by = c("gps", "gpx_date", "gpx_hour", "minute"))
 rm(lat, mean_lat)
 
 anem <- anem %>% 
   select(lat, lon, date, anem_id)
 
-# merge multiple observations of anemones into one #### (doesn't work for Allison right now b/c not have 03/04 data but should once do)
+# merge multiple observations of anemones into one #### 
 anem <- anem %>% 
   group_by(anem_id) %>% 
   summarize(lat = mean(lat),
