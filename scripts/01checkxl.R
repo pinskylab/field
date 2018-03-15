@@ -270,21 +270,22 @@ anti_join(pit, tag_ids, by = c("scan" = "tag_id"))
 # view any problems that need to be taken care of
 problem
 
-
-# do we have any tags that are scanned as Y and only appear once - compare to db?
-load("data/fish_db.Rdata")
-
-# what are past tags?
-db_tags <- fish_db %>% 
-  select(tag_id) 
-
-# which tags were marked as recaptures this field season
-current_tags <- clown %>% 
-  filter(recap == "Y") %>% 
-  select(tag_id)
-
-# are any of these tags not in the db already?
-missing <- anti_join(current_tags, db_tags)
+# Doesn't seem to be working as of 3/15/18; pulls out 986112100172598 and 986112100172301, both of which were scanned in 2017 when connect directly to database and check...
+# # do we have any tags that are scanned as Y and only appear once - compare to db?
+# load("data/fish_db.Rdata")
+# 
+# # what are past tags?
+# db_tags <- fish_db %>% 
+#   select(tag_id) 
+# 
+# # which tags were marked as recaptures this field season
+# current_tags <- clown %>% 
+#   filter(recap == "Y") %>% 
+#   select(tag_id)
+# 
+# # are any of these tags not in the db already?
+# missing <- anti_join(current_tags, db_tags)
+# 
 
 # should be 0 obs ####
 
