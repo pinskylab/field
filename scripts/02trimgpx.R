@@ -22,7 +22,14 @@ library(googlesheets)
 mykey <- '1symhfmpQYH8k9dAvp8yV_j_wCTpIT8gO9No4s2OIQXo' # access the file
 entry <-gs_key(mykey)
 clown <-gs_read(entry, ws='clownfish')
-surv <- gs_read(entry, ws="diveinfo")
+dive <- gs_read(entry, ws="diveinfo")
+
+# # load data from saved if network connection is lost
+# # THIS HAS TO BE MANUALLY UPDATED WITH MOST CURRENT VERSION OF SAVED FILE  - COULD WRITE CODE TO FIND AND LOAD THE MOST CURRENT VERSION ####
+# load(file = "data/clown_2018-03-14 20:46:44.Rdata")
+# load(file = "data/dive_2018-03-14 20:46:44.Rdata")
+
+surv <- dive
 
 # # if the data is in csv - the csvs aren't working with this code - need to convert characters to datte time??
 # surv <- read.csv(file = "data/2018_clownfish_data_entry - diveinfo.csv", stringsAsFactors = F)
@@ -97,6 +104,7 @@ for (l in 1:length(gps)){
   }
 }
 
+# now import the trimmed tracks into QGIS as vector files ####
 
 
 

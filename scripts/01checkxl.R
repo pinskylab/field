@@ -240,17 +240,14 @@ clown <- clown %>%
   mutate(tag_id = stringr::str_replace(tag_id, "9851_", "985153000")) %>% 
   mutate(tag_id = stringr::str_replace(tag_id, "9861_", "986112100")) %>% 
   mutate(tag_id = stringr::str_replace(tag_id, "9820_", "982000411")) %>% 
-  mutate(tag_id = stringr::str_replace(tag_id, "9821_", "982126052")) 
-
-clown <- clown %>% # fix 6 digit entries
+  mutate(tag_id = stringr::str_replace(tag_id, "9821_", "982126052")) %>% # fix 6 digit entries
   mutate(tag_id = stringr::str_replace(tag_id, "^95", "98212605295"), 
-    #tag_id = stringr::str_replace(tag_id, "^818", "982126052818"), 
     tag_id = stringr::str_replace(tag_id, "^818", "982000411818"),
     tag_id = stringr::str_replace(tag_id, "^1", "9861121001"),
     tag_id = stringr::str_replace(tag_id, "^3", "9851530003"),
     tag_id = stringr::str_replace(tag_id, "^4", "9851530004"),
     tag_id = stringr::str_replace(tag_id, "^6", "9821260526"))
-    #tag_id = stringr::str_replace(tag_id, "^6", "9820004116"))
+    
     
 
 tag_ids <- clown %>% select(contains("tag")) %>% filter(!is.na(tag_id))
@@ -260,10 +257,15 @@ tag_ids <- clown %>% select(contains("tag")) %>% filter(!is.na(tag_id))
 # ---------------------------------------------
 
 # What tags are in the spreadsheet that were not scanned by the scanner (type-os) - should return 0 rows
-anti_join(tag_ids, pit, by = c("tag_id" = "scan"))
+spreadsheet <- anti_join(tag_ids, pit, by = c("tag_id" = "scan"))
+clown %>% 
+  filter(tag_id %in% spreadsheet$tag_id) %>% 
+  select(dive_num, obs_time, tag_id)
+
 
 # What tags are in the scanner that are not in spreadsheet (type-os) - should return 0 rows
 anti_join(pit, tag_ids, by = c("scan" = "tag_id"))  
+# 818456 was scanned but the fish escaped before they could be tagged so as of 2018-03-14  it has not been used yet.
 
 # view any problems that need to be taken care of
 problem
