@@ -19,6 +19,12 @@ entry <-gs_key(mykey)
 clown <-gs_read(entry, ws='clownfish')
 dive <- gs_read(entry, ws="diveinfo")
 
+# save data in case network connection is lost
+clownfilename <- str_c("data/clown_", Sys.time(), ".Rdata", sep = "")
+divefilename <- str_c("data/dive_", Sys.time(), ".Rdata", sep = "")
+save(clown, file = clownfilename)
+save(dive, file = divefilename)
+
 # # load data from saved if network connection is lost
 # # THIS HAS TO BE MANUALLY UPDATED WITH MOST CURRENT VERSION OF SAVED FILE  - COULD WRITE CODE TO FIND AND LOAD THE MOST CURRENT VERSION ####
 # load(file = "data/clown_2018-03-12 21:13:51.Rdata")
