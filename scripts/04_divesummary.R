@@ -154,7 +154,7 @@ rep_tag <- fish %>%
 # how many captures were repeats of a tag already caught this season
 same_seas_recap <- fish %>% 
   mutate(tag_id = str_sub(tag_id, -6)) %>% # make sure all tag_ids are only 6 digits
-  filter(tag_id %in% rep_tag) # can't do recap == Y because the first capture of this year might also have been a recap
+  filter(tag_id %in% rep_tag$tag_id) # can't do recap == Y because the first capture of this year might also have been a recap
 # add counts of scans
 same_seas_recap <- left_join(same_seas_recap, rep_tag, by = "tag_id")
 rm(rep_tag)
