@@ -166,7 +166,7 @@ z <- anti_join(y, fins) # show which numbers are missing,
 # should be 0 obs ####
 
 
-  # are there missing anemone_id numbers on the clownfish sheet?  #### - begin with the starting anem number for this field season
+  # are there missing anemone tag numbers on the clownfish sheet?  #### - begin with the starting anem number for this field season
   # gather the used ids
 anem_ids <- clown %>% 
   select(anem_id) %>% 
@@ -178,6 +178,8 @@ y <- data.frame(x) %>%
   rename(anem_id = x) 
 
 z <- anti_join(y, anem_ids)
+
+# 2947, 3101, and 3015 are ok, probably dropped
 
 # are there anemones listed at a different site than they were in other years? Don't include new tags - in 2018 2938 was first tag ####
 
@@ -270,8 +272,8 @@ anti_join(pit, tag_ids, by = c("scan" = "tag_id"))
 # view any problems that need to be taken care of
 problem
 
-# Doesn't seem to be working as of 3/15/18; pulls out 986112100172598 and 986112100172301, both of which were scanned in 2017 when connect directly to database and check...
-# # do we have any tags that are scanned as Y and only appear once - compare to db?
+
+# # do we have any tags that are scanned as Y and only appear once - compare to db? - # Doesn't seem to be working as of 3/15/18; pulls out 986112100172598 and 986112100172301, both of which were scanned in 2017 when connect directly to database and check...
 # load("data/fish_db.Rdata")
 # 
 # # what are past tags?
