@@ -181,7 +181,8 @@ dive_count <- dive %>%
 sitetot <- left_join(sitetot, dive_count, by = "site")
 
 sitetot <- sitetot %>% 
-  select(site, number_dives, observed, captured, finclip, recap, clipped_recaps, same_season_recap)
+  select(site, number_dives, observed, captured, finclip, recap, clipped_recaps, same_season_recap) %>%
+  distinct()
 
 # are any captured more than observed?
 bad <- filter(sitetot, captured > observed) # 2017: the one at visca is ok because it is "????"
