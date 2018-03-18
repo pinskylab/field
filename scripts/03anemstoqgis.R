@@ -31,28 +31,30 @@ save(dive, file = divefilename)
 # load(file = "data/dive_2018-03-12 21:13:52.Rdata")
 
 
-anem <- clown
-names(anem) <- tolower(names(anem))
-anem <- filter(anem, !is.na(dive_num))
-anem <- distinct(anem)
+anem <- clown %>% 
+  filter(!is.na(dive_num)) %>%
+  distinct() %>% 
+  mutate(gps = as.integer(gps))
+
 anem$id <- 1:nrow(anem) # add row numbers so that gpx can be added later (creates 4 rows for each anem)
 
 
 names(dive) <- tolower(names(dive))
 dive <- dive %>%
   filter(dive_num %in% anem$dive_num) %>%
-  select(dive_num, date, site, municipality, cover, gps)
-dive <- distinct(dive)
+  select(dive_num, date, site, municipality, cover, gps) %>% 
+  distinct()
+
 
 # ---------------------------------------------
 #   add dates and sites to anems
 # ---------------------------------------------
 
-anem <- left_join(anem, dive, by = "dive_num")
+anem <- left_join(anem, dive, by = c("dive_num", "gps"))
 
 # find samples that are lacking an anemone
 (lack <- anem %>%
-    filter(is.na(anem_id) & !is.na(fish_spp)) %>% 
+    filter(is.na(anem_id), !is.na(fish_spp)) %>% 
     select(dive_num, obs_time, tag_id, fin_id, notes) %>% 
     filter(!is.na(fin_id) | !is.na(tag_id)))
 
@@ -163,8 +165,6 @@ anem %>%
 # fish <- select(fish, lat, lon, notes, obs_time, site, anem_id)
 # # what isn't in fish?
 anem <- anem %>%
-  filter(!is.na(anem_spp) & anem_spp != "" & is.na(fish_spp)) %>%
-  mutate(notes = anem_spp) %>%
   select(lat, lon, notes, obs_time, site, anem_id) ##ALLISON NOTE: added year hear b/c was needed in write_csv line below ## MRS - removed year because it doesn't exist in the table?
 out <- anem
 # out <- rbind(fish,anem)
@@ -179,5 +179,5 @@ out <- out %>%
 
 write_csv(out, str_c("data/GPSSurvey_anemlatlon_forQGIS_2018_", Sys.Date(), ".csv", sep = ""))
 
-### MOVE THIS CSV TO THE PHILS_GIS_R DATA DIRECTORY ###
+s### MOVE THIS CSV TO THE PHILS_GIS_R DATA DIRECTORY ###
 
