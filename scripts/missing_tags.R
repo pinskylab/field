@@ -1,76 +1,185 @@
 # how many fish were tagged in the past that we have not captured this season
+  # wanted to pull the date times from the pit scanner and determine gps locations that way, however, not all scans were done during a dive (some were done on land, like the 2015 field season)
 
-
-# an important feature of this is how to assign lat long to observations - we want to assign lat long to pit scans
-
-# start with the anem_to_qgis script and modify to assign to the observations in the bioterm file instead of the anemone table
-
+library(ggplot2)
 library(lubridate)
 library(stringr)
 source("scripts/field_helpers.R")
 
-# get tagged fish from bioterm file ####
-pit <- from_scanner("data/BioTerm.txt") %>% 
-  filter(substr(scan,1,3) != "989" & substr(scan,1,3) != "999") %>% # get rid of test tags
-  arrange(date, time) %>% 
-  mutate(date = ymd(date), 
-    date_time = force_tz(ymd_hms(str_c(date, time, sep = " ")), tzone = "Asia/Manila"))
+# get currently scanned fish
+# # if data is accessible in google sheets:
+# library(googlesheets)
+# # gs_auth(new_user = TRUE) # run this if having authorization problems
+# mykey <- '1symhfmpQYH8k9dAvp8yV_j_wCTpIT8gO9No4s2OIQXo' # access the file
+# entry <-gs_key(mykey)
+# clown <-gs_read(entry, ws='clownfish')
+# dive <- gs_read(entry, ws="diveinfo")
+# 
+# # # save data in case network connection is lost
+# clownfilename <- str_c("data/clown_", Sys.time(), ".Rdata", sep = "")
+# divefilename <- str_c("data/dive_", Sys.time(), ".Rdata", sep = "")
+
+# clown <- clown %>%  # adapt time because having trouble with time loading as numeric
+#   mutate(obs_time = as.character(obs_time))
+# save(clown, file = clownfilename)
+# save(dive, file = divefilename)
+
+# load data from saved if network connection is lost
+# THIS HAS TO BE MANUALLY UPDATED WITH MOST CURRENT VERSION OF SAVED FILE  - COULD WRITE CODE TO FIND AND LOAD THE MOST CURRENT VERSION ####
+load(file = "data/clown_2018-03-20 02:38:39.Rdata")
+load(file = "data/dive_2018-03-20 02:38:39.Rdata")
+
+# ---------------------------------------------
+#   format tag ids on clownfish data sheet
+# ---------------------------------------------
+clown <- clown %>% 
+  mutate(tag_id = stringr::str_replace(tag_id, "9851_", "985153000")) %>% 
+  mutate(tag_id = stringr::str_replace(tag_id, "9861_", "986112100")) %>% 
+  mutate(tag_id = stringr::str_replace(tag_id, "9820_", "982000411")) %>% 
+  mutate(tag_id = stringr::str_replace(tag_id, "9821_", "982126052")) %>% # fix 6 digit entries
+  mutate(tag_id = stringr::str_replace(tag_id, "^95", "98212605295"), 
+    tag_id = stringr::str_replace(tag_id, "^818", "982000411818"),
+    tag_id = stringr::str_replace(tag_id, "^1", "9861121001"),
+    tag_id = stringr::str_replace(tag_id, "^3", "9851530003"),
+    tag_id = stringr::str_replace(tag_id, "^4", "9851530004"),
+    tag_id = stringr::str_replace(tag_id, "^6", "9821260526"))
 
 
+# get current season tagged fish  ####
+present <- clown %>% 
+  filter(!is.na(tag_id)) %>% 
+  select(dive_num, tag_id, obs_time, size, color) # include fields to assign a date and time
+dive <- dive %>% 
+  select(dive_num, gps, date) %>% 
+  filter(gps == 4)
 
-# separate data into the past and the current field season ####
-# find only this year - format of date should be 18-01-01
-past <- filter(pit, substr(date, 3, 4) != "18")
-present <- filter(pit, substr(date, 3, 4) == "18")
+present <- left_join(present, dive, by = "dive_num") %>% 
+  select(-dive_num) %>% 
+  mutate(time = ymd_hms(str_c(date, obs_time, sep = " ")))
 
-# add missing data from db ####
-pit_db <- read.csv(stringsAsFactors = F, file = "data/pitscan.csv", na = "NULL") %>% 
-  unite(scan, city, tag, sep = "") %>% 
-  select(-notes) %>% 
-  distinct()
+# add data from database #### 
+# # on campus
+# leyte <- read_db("Leyte")
+# past <- leyte %>% 
+#   tbl("clownfish") %>% 
+# filter(!is.na(tag_id))
 
-# combine db pitscans with past ####
-past <- rbind(past, pit_db) %>% 
-  distinct()
-rm(pit, pit_db)
+# in the field this is as a csv
+past <- read.csv(stringsAsFactors = F, file = "data/clownfish.csv", na = "NULL") %>% 
+  filter(!is.na(tag_id)) %>% 
+  select(anem_table_id, tag_id, size, color)# include fields to assign a date and time, also size 
+anem <- read.csv(stringsAsFactors = F, na = "NULL", file = "data/anemones.csv") %>% 
+  filter(anem_table_id %in% past$anem_table_id) %>% 
+  select(anem_table_id, dive_table_id, obs_time)
+past <- left_join(past, anem, by = "anem_table_id")
+dive <- read.csv(stringsAsFactors = F, na = "NULL", file = "data/diveinfo.csv") %>% 
+  filter(dive_table_id %in% past$dive_table_id) %>% 
+  select(dive_table_id, date, gps)
+past <- left_join(past, dive, by = "dive_table_id") %>% 
+  mutate(time = ymd_hms(str_c(date, obs_time, sep = " ")), 
+    tag_id = as.character(tag_id)) %>% 
+  select(-contains("table")) %>% 
+  rename(old_size = size, 
+    old_color = color)
 
-# need gps, get a list of dives done on these dates ####
+# remove scans from the current field season ####
+recaps <- present %>% 
+  filter(tag_id %in% past$tag_id)
+recaps <- left_join(recaps, past, by = "tag_id")
 
-# for previous years
-dive <- read.csv(stringsAsFactors = F, file = "data/diveinfo.csv", na = "NULL") %>% 
-  mutate(date = as.Date(date)) %>% 
-  filter(date %in% past$date, dive_type == "C") %>% 
-  select(date, gps)
-past <- left_join(past, dive, by = "date") %>%  
-  distinct()
-rm(dive)
+past <- anti_join(past, present, by = "tag_id")
+rm(anem, present)
 
-# for current year # in 2018 gps4 was used for pit tagger
-present <- mutate(present, gps = 4)
+# take a look at size structure of unscanned tags
+ggplot(past, aes(old_size)) + 
+  geom_bar()
+
+# how many fish have grown? by how much?
+
+# how many fish have changed tail color
+
+
 
 # format scans to compare with gps ####
+# add time zone
+past <- past %>% 
+  mutate(time = force_tz(time, tzone = "Asia/Manila"))
 # convert to UTC
 past <- past %>% 
-  mutate(date_time = with_tz(date_time, tzone = "UTC"))
-present <- present %>% 
-  mutate(date_time = with_tz(date_time, tzone = "UTC"))
+  mutate(time = with_tz(time, tzone = "UTC")) 
 
 # split out time components to compare to latlong
 past <- past %>%
-  mutate(month = month(date)) %>%
-  mutate(day = day(date)) %>%
-  mutate(hour = hour(date_time)) %>%
-  mutate(min = minute(date_time)) %>%
-  mutate(sec = second(date_time)) %>%
-  mutate(year = year(date))
+  mutate(month = month(time)) %>%
+  mutate(day = day(time)) %>%
+  mutate(hour = hour(time)) %>%
+  mutate(min = minute(time)) %>%
+  mutate(sec = second(time)) %>%
+  mutate(year = year(time))
 
-present <- present %>%
-  mutate(month = month(date)) %>%
-  mutate(day = day(date)) %>%
-  mutate(hour = hour(date_time)) %>%
-  mutate(min = minute(date_time)) %>%
-  mutate(sec = second(date_time)) %>%
-  mutate(year = year(date))
+past <- past %>% 
+  select(-time, -sec)
+
+# pull in the gpx data
+gpx <- read.csv(stringsAsFactors = F, na = "NULL", file = "data/GPX.csv") %>% 
+  mutate(time = ymd_hms(time))
+
+# format for comparison with table
+gpx <- gpx %>%
+  mutate(month = month(time)) %>%
+  mutate(day = day(time)) %>%
+  mutate(hour = hour(time)) %>%
+  mutate(min = minute(time)) %>%
+  mutate(sec = second(time))
+
+# fix formatting
+gpx$lat <- as.character(gpx$lat) # otherwise they import as factors
+gpx$lon <- as.character(gpx$lon)
+gpx$time <- as.character(gpx$time)
+
+# find matches for times to assign lat long - there are more than one set of seconds (sec.y) that match
+past <- left_join(past, gpx, by = c("month", "day", "hour", "min", c("gps" = "unit")))
+rm(gpx)
+# # failed to assign lat lon - none failed as of 2018-03-20
+# fail <- test %>% 
+#   filter(is.na(lat))
+past <- past %>% 
+  mutate(lat = as.numeric(lat), 
+    lon = as.numeric(lon)) # need to make decimal 5 digits - why? because that is all the gps can hold
+
+
+coord <- past %>%
+  group_by(gps, month, day, hour, min, year, tag_id) %>%
+  summarise(mlat = mean(lat, na.rm = TRUE),
+    mlon = mean(lon, na.rm = T))
+
+# drop all of the unneccessary columns from anem and join with the coord
+coord <- coord %>% 
+  select(tag_id, mlat, mlon) # won't let me get rid of the other columns 
+
+# Examine the data
+coord %>%
+  select(tag_id, mlat, mlon)
+
+
+# how many tags are scanned more than once? 89, most number of scans is 4, many of the 89 are 2
+# test <- coord %>% 
+#   group_by(tag_id) %>% 
+#   summarise(num_scans = n()) %>% 
+#   filter(num_scans > 1)
+# # get each tag down to one observation - this is just anem_id and lat long, no extra info here
+# out <- out %>%
+#   group_by(anem_id) %>%
+#   summarise(mlat = mean(lat, na.rm = TRUE),
+#     mlon = mean(lon, na.rm = T))
+
+readr::write_csv(coord, str_c("data/unscanned_pit_tags_for_QGIS_2018_", Sys.Date(), ".csv", sep = ""))
+
+### MOVE THIS CSV TO THE PHILS_GIS_R DATA DIRECTORY ###
+
+# what is the size structure of unscanned tags?
+library(ggplot2)
+
 
 
 
