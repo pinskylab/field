@@ -1,12 +1,28 @@
 # how many fish were tagged in the past that we have not captured this season
-library(dplyr)
-library(lubridate)
 
-# get tagged fish
-# in the field, get from saved csv
-fish <- read.csv("data/clownfish.csv", stringsAsFactors = F) %>% 
-  filter(tag_id != "NULL") %>% 
-  select(tag_id, anem_table_id)
+
+# an important feature of this is how to assign lat long to observations - we want to assign lat long to pit scans
+
+# start with the anem_to_qgis script and modify to assign to the observations in the bioterm file instead of the anemone table
+
+# library(lubridate)
+source("scripts/field_helpers.R")
+
+# get tagged fish from bioterm file ####
+debugonce(from_scanner)
+pit <- from_scanner("data/BioTerm.txt") # should generate 4 parsing failures #AD note - only generated 3 parsing errors... but still produces 3 columns "scan", "date", "time"
+
+
+# find only this year - format of date should be 18-01-01 #AD note - date is actually formatted 01/01/16
+pit <- filter(pit, substr(date, 1,2) == "18")
+#pit <- filter(pit, substr(date, 7,8) == "18" | substr(date, 1,2) == "18") #placement of year changes throughout! but looks like the 4 with 7,8 position are repeated with 1,2 too
+
+
+
+# get rid of test tags
+pit <- filter(pit, substr(scan,1,3) != "989" & substr(scan,1,3) != "999")
+pit <- arrange(pit, date, time)
+
 
 # connect to dive site
 anem <- read.csv("data/anemones.csv", stringsAsFactors = F) %>% 
