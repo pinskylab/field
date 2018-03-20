@@ -90,43 +90,43 @@ recaps <- left_join(recaps, past, by = "tag_id")
 past <- anti_join(past, present, by = "tag_id")
 rm(anem, present)
 
-# take a look at size structure of unscanned tags
-ggplot(past) +
-  stat_count(mapping = aes(x = old_size))
-
-# how many fish have grown? by how much?
-ggplot(data = recaps, mapping = aes(x = as.numeric(old_size), y = size)) +
-  geom_point(mapping = aes(color = old_color))+
-  geom_smooth()
-
-ggplot(data = recaps) + 
-  geom_point(mapping = aes(x = as.numeric(old_size), y = size)) + 
-  facet_grid(. ~ color) 
-
-ggplot(recaps) +
-  stat_count(mapping = aes(x = size))
-
-# how many fish have changed tail color #56, most of these that changed, changed to YP
-change_color <- recaps %>% 
-  filter(old_color != color)
-ggplot(data = change_color) +
-  geom_bar(mapping = aes(x = color))
-
-ggplot(data = recaps) +
-  stat_summary(
-    mapping = aes(x = color, y = as.numeric(size)),
-    fun.ymin = min,
-    fun.ymax = max,
-    fun.y = median
-  )
-
-ggplot(data = past) +
-  stat_summary(
-    mapping = aes(x = old_color, y = as.numeric(old_size)),
-    fun.ymin = min,
-    fun.ymax = max,
-    fun.y = median
-  )
+# # take a look at size structure of unscanned tags
+# ggplot(past) +
+#   stat_count(mapping = aes(x = old_size))
+# 
+# # how many fish have grown? by how much?
+# ggplot(data = recaps, mapping = aes(x = as.numeric(old_size), y = size)) +
+#   geom_point(mapping = aes(color = old_color))+
+#   geom_smooth()
+# 
+# ggplot(data = recaps) + 
+#   geom_point(mapping = aes(x = as.numeric(old_size), y = size)) + 
+#   facet_grid(. ~ color) 
+# 
+# ggplot(recaps) +
+#   stat_count(mapping = aes(x = size))
+# 
+# # how many fish have changed tail color #56, most of these that changed, changed to YP
+# change_color <- recaps %>% 
+#   filter(old_color != color)
+# ggplot(data = change_color) +
+#   geom_bar(mapping = aes(x = color))
+# 
+# ggplot(data = recaps) +
+#   stat_summary(
+#     mapping = aes(x = color, y = as.numeric(size)),
+#     fun.ymin = min,
+#     fun.ymax = max,
+#     fun.y = median
+#   )
+# 
+# ggplot(data = past) +
+#   stat_summary(
+#     mapping = aes(x = old_color, y = as.numeric(old_size)),
+#     fun.ymin = min,
+#     fun.ymax = max,
+#     fun.y = median
+#   )
 
 # format scans to compare with gps ####
 # add time zone
@@ -154,19 +154,19 @@ gpx <- read.csv(stringsAsFactors = F, na = "NULL", file = "data/GPX.csv") %>%
 
 # format for comparison with table
 gpx <- gpx %>%
-  mutate(month = month(time)) %>%
-  mutate(day = day(time)) %>%
-  mutate(hour = hour(time)) %>%
-  mutate(min = minute(time)) %>%
-  mutate(sec = second(time))
-
-# fix formatting
-gpx$lat <- as.character(gpx$lat) # otherwise they import as factors
-gpx$lon <- as.character(gpx$lon)
-gpx$time <- as.character(gpx$time)
+  mutate(year = year(time), 
+      month = month(time), 
+    day = day(time), 
+    hour = hour(time), 
+    min = minute(time), 
+    sec = second(time), 
+    lat = as.character(lat), 
+    lon = as.character(lon), 
+    time = as.character(time)) %>% 
+  rename(gps = unit)
 
 # find matches for times to assign lat long - there are more than one set of seconds (sec.y) that match
-past <- left_join(past, gpx, by = c( c("gps" = "unit")))
+past <- left_join(past, gpx)
 rm(gpx)
 # # failed to assign lat lon - none failed as of 2018-03-20
 # fail <- test %>% 
@@ -205,7 +205,7 @@ readr::write_csv(coord, str_c("data/unscanned_pit_tags_for_QGIS_2018_", Sys.Date
 
 ### MOVE THIS CSV TO THE PHILS_GIS_R DATA DIRECTORY ###
 
-test <- read.csv("data/clownfish.csv")
+
 
 
 
