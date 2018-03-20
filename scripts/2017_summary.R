@@ -1,7 +1,7 @@
 # This is a script to determine for each dive the number of fish captured, sampled and recatpured and the same numbers at each site, also the number of dives per site.
 
 # ---------------------------------------------
-#   Set up work space - load packages and data
+#   Set up work space - load packages and data ####
 # ---------------------------------------------
 library(tidyverse)
 library(stringr)
@@ -11,20 +11,17 @@ clown <- read.csv(stringsAsFactors = F, file = "data/clownfish.csv", na = "NULL"
 dive <- read.csv(stringsAsFactors = F, file = "data/diveinfo.csv", na = "NULL")
 anem <- read.csv(stringsAsFactors = F, file = "data/anemones.csv", na = "NULL")
 
-# make tags comparable
-clown <- clown %>% 
-  mutate(tag_id = as.character(tag_id))
-
 # get dive info
 site <- dive
 names(site) <- stringr::str_to_lower(names(site))
 site <- site %>% 
   filter(!is.na(dive_num)) %>% 
-  select(dive_num, site, dive_table_id, date) %>% 
+  select(dive_num, site, dive_table_id, date, dive_type) %>% 
   distinct()
 
 # fish processing info from clownfish db
-samp <- clown
+samp <- clown %>% 
+  mutate(tag_id = as.character(tag_id)) # format tags for comparablilty
 names(samp) <- stringr::str_to_lower(names(samp))
 
 # add dive info via anem table
@@ -36,14 +33,18 @@ anem <- anem %>%
 samp <- left_join(samp, anem, by = "anem_table_id")
 dive <- dive %>% 
   filter(dive_table_id %in% samp$dive_table_id) %>% 
-      select(dive_table_id, dive_num, site, date)
+      select(dive_table_id, dive_num, site, date, dive_type)
 samp <- left_join(samp, dive, by = "dive_table_id") 
 
 samp <- samp %>%
   filter(grepl("2017", date)) %>% 
-  select(fish_spp, size, color, fin_id, recap, tag_id, dive_num, site, date)
+  select(fish_spp, size, color, fin_id, recap, tag_id, dive_num, site, date, dive_type)
 
-samp <- filter(samp, !is.na(dive_num))
+# testing to see if there are any "captured" that are dive_type == "A"
+samp <- samp %>% 
+  filter(dive_type == "C")
+
+
 fish <- samp
 
 # make a table of observed APCL
