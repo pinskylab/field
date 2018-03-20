@@ -91,14 +91,42 @@ past <- anti_join(past, present, by = "tag_id")
 rm(anem, present)
 
 # take a look at size structure of unscanned tags
-ggplot(past, aes(old_size)) + 
-  geom_bar()
+ggplot(past) +
+  stat_count(mapping = aes(x = old_size))
 
 # how many fish have grown? by how much?
+ggplot(data = recaps, mapping = aes(x = as.numeric(old_size), y = size)) +
+  geom_point(mapping = aes(color = old_color))+
+  geom_smooth()
 
-# how many fish have changed tail color
+ggplot(data = recaps) + 
+  geom_point(mapping = aes(x = as.numeric(old_size), y = size)) + 
+  facet_grid(. ~ color) 
 
+ggplot(recaps) +
+  stat_count(mapping = aes(x = size))
 
+# how many fish have changed tail color #56, most of these that changed, changed to YP
+change_color <- recaps %>% 
+  filter(old_color != color)
+ggplot(data = change_color) +
+  geom_bar(mapping = aes(x = color))
+
+ggplot(data = recaps) +
+  stat_summary(
+    mapping = aes(x = color, y = as.numeric(size)),
+    fun.ymin = min,
+    fun.ymax = max,
+    fun.y = median
+  )
+
+ggplot(data = past) +
+  stat_summary(
+    mapping = aes(x = old_color, y = as.numeric(old_size)),
+    fun.ymin = min,
+    fun.ymax = max,
+    fun.y = median
+  )
 
 # format scans to compare with gps ####
 # add time zone
@@ -138,7 +166,7 @@ gpx$lon <- as.character(gpx$lon)
 gpx$time <- as.character(gpx$time)
 
 # find matches for times to assign lat long - there are more than one set of seconds (sec.y) that match
-past <- left_join(past, gpx, by = c("month", "day", "hour", "min", c("gps" = "unit")))
+past <- left_join(past, gpx, by = c( c("gps" = "unit")))
 rm(gpx)
 # # failed to assign lat lon - none failed as of 2018-03-20
 # fail <- test %>% 
@@ -147,15 +175,15 @@ past <- past %>%
   mutate(lat = as.numeric(lat), 
     lon = as.numeric(lon)) # need to make decimal 5 digits - why? because that is all the gps can hold
 
+past <- past %>% 
+  select(-sec, -time, -elev, -month, -day, -hour, -min, -year) %>% 
+  distinct()
+
 
 coord <- past %>%
-  group_by(gps, month, day, hour, min, year, tag_id) %>%
+  group_by(tag_id) %>%
   summarise(mlat = mean(lat, na.rm = TRUE),
     mlon = mean(lon, na.rm = T))
-
-# drop all of the unneccessary columns from anem and join with the coord
-coord <- coord %>% 
-  select(tag_id, mlat, mlon) # won't let me get rid of the other columns 
 
 # Examine the data
 coord %>%
@@ -177,8 +205,8 @@ readr::write_csv(coord, str_c("data/unscanned_pit_tags_for_QGIS_2018_", Sys.Date
 
 ### MOVE THIS CSV TO THE PHILS_GIS_R DATA DIRECTORY ###
 
-# what is the size structure of unscanned tags?
-library(ggplot2)
+test <- read.csv("data/clownfish.csv")
+
 
 
 
