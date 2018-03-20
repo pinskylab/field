@@ -176,7 +176,7 @@ library(dplyr)
 #' clowncol <- c("text", "text", "text", "text", "text", "text", "text", "text", "text", "text", "text", "text", "text")
 #' clown <- excl("clownfish", clowncol)
 
-excl <- function(x, y) {
+excl <- function(sheet_name_in_quotes, list_of_col_types) {
   excl <- readxl::read_excel(excel_file, sheet = x, col_names = T, col_types = y)
   return(excl)
 }

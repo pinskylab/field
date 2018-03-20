@@ -5,24 +5,24 @@ library(tidyverse)
 library(stringr)
 source("scripts/field_helpers.R")
 
-# if data is accessible in google sheets:
-library(googlesheets)
-# gs_auth(new_user = TRUE) # run this if having authorization problems
-mykey <- '1symhfmpQYH8k9dAvp8yV_j_wCTpIT8gO9No4s2OIQXo' # access the file
-entry <-gs_key(mykey)
-clown <-gs_read(entry, ws='clownfish')
-dive <- gs_read(entry, ws="diveinfo")
+# # if data is accessible in google sheets:
+# library(googlesheets)
+# # gs_auth(new_user = TRUE) # run this if having authorization problems
+# mykey <- '1symhfmpQYH8k9dAvp8yV_j_wCTpIT8gO9No4s2OIQXo' # access the file
+# entry <-gs_key(mykey)
+# clown <-gs_read(entry, ws='clownfish')
+# dive <- gs_read(entry, ws="diveinfo")
 
-# save data in case network connection is lost
-clownfilename <- str_c("data/clown_", Sys.time(), ".Rdata", sep = "")
-divefilename <- str_c("data/dive_", Sys.time(), ".Rdata", sep = "")
-save(clown, file = clownfilename)
-save(dive, file = divefilename)
+# # save data in case network connection is lost
+# clownfilename <- str_c("data/clown_", Sys.time(), ".Rdata", sep = "")
+# divefilename <- str_c("data/dive_", Sys.time(), ".Rdata", sep = "")
+# save(clown, file = clownfilename)
+# save(dive, file = divefilename)
 
-# # load data from saved if network connection is lost
-# # THIS HAS TO BE MANUALLY UPDATED WITH MOST CURRENT VERSION OF SAVED FILE  - COULD WRITE CODE TO FIND AND LOAD THE MOST CURRENT VERSION ####
-# load(file = "data/clown_2018-03-10 20:34:58.Rdata")
-# load(file = "data/dive_2018-03-10 20:34:59.Rdata")
+# load data from saved if network connection is lost
+# THIS HAS TO BE MANUALLY UPDATED WITH MOST CURRENT VERSION OF SAVED FILE  - COULD WRITE CODE TO FIND AND LOAD THE MOST CURRENT VERSION ####
+load(file = "data/clown_2018-03-18 20:18:57.Rdata")
+load(file = "data/dive_2018-03-18 20:18:57.Rdata")
 
 
 # # if data is via csv
@@ -142,16 +142,17 @@ if (nrow(bad) > 0){
 # problem <- rbind(problem, bad)
 # rm(bad, good)
 
-# Are there repeat ID numbers on the clownfish sheet? ####
-dups <- clown %>% 
+# Are there repeat fin_ID numbers on the clownfish sheet? ####
+bad <- clown %>% 
   select(contains("id"), -contains("anem_id"), -contains("tag_id")) %>% 
   filter(!is.na(fin_id)) %>% 
   group_by(fin_id) %>% 
   summarise(count = n()) %>% 
   filter(count > 1)
-if (nrow(dups) > 0){
-  print("fin_id is repeated on datasheet")
+if (nrow(bad) > 0){
+  bad$typeo <- "fin_id is repeated on datasheet"
 }
+(problem <- rbind(problem, bad))
 
 # Are there missing ID numbers on the clownfish sheet? ####
 fins <- clown %>%
@@ -161,12 +162,13 @@ fins <- clown %>%
 x <- c(1:max(fins$fin_id))  # get the highest fin_id so far
 y <- data.frame(x) %>% 
   rename(fin_id = x) # create a sequence of numbers 1-highest fin_id
-z <- anti_join(y, fins) # show which numbers are missing, 
+bad <- anti_join(y, fins) # show which numbers are missing, 
+if (nrow(bad) > 0){
+  bad$typeo <- "fin_id is missing"
+}
+(problem <- rbind(problem, bad))
 
-# should be 0 obs ####
-
-
-  # are there missing anemone tag numbers on the clownfish sheet?  #### - begin with the starting anem number for this field season
+# are there missing anemone tag numbers on the clownfish sheet?  #### - begin with the starting anem number for this field season
   # gather the used ids
 anem_ids <- clown %>% 
   select(anem_id) %>% 
@@ -175,11 +177,14 @@ anem_ids <- clown %>%
 
 x <- c(2938:max(anem_ids$anem_id)) #2938 is the first anem_id for 2018
 y <- data.frame(x) %>% 
-  rename(anem_id = x) 
+  rename(anem_id = x) %>% 
+  filter(anem_id != 3101, anem_id != 3015, anem_id != 2947) # these tags were probably dropped
 
-z <- anti_join(y, anem_ids)
-
-# 2947, 3101, and 3015 are ok, probably dropped
+bad <- anti_join(y, anem_ids)
+if (nrow(bad) > 0){
+  bad$typeo <- "anem_id is missing"
+}
+(problem <- rbind(problem, bad))
 
 # are there anemones listed at a different site than they were in other years? Don't include new tags - in 2018 2938 was first tag ####
 
@@ -198,8 +203,6 @@ anem_site <- anem_db %>%
   distinct() %>% 
   rename(old_site = site)
 
-
-
   # compile a list of anemones with sites from this year
   anem <- clown %>% 
     select(dive_num, anem_id) %>% 
@@ -210,13 +213,18 @@ anem_site <- anem_db %>%
     select(dive_num, anem_id, site)
   
   # compare the two tables # diff 
-  diff <- left_join(new_anem_site, anem_site, by = "anem_id") %>% 
+  bad <- left_join(new_anem_site, anem_site, by = "anem_id") %>% 
     filter(old_site != site | is.na(site)) #need to figure out how to get filter to keep nas, bad work-around at the moment
   
   # %>% 
     # filter(old_site != site)
 
   # should have 0 obs ####
+  
+  if (nrow(bad) > 0){
+    bad$typeo <- "anem site does not match previous year"
+  }
+  (problem <- rbind(problem, bad))
   
   
 # ---------------------------------------------
@@ -294,3 +302,4 @@ problem
 
 # are there any anemones that lack a description?
 # fish anems - vs anem obs
+
