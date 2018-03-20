@@ -42,7 +42,7 @@ samp <- samp %>%
 
 # testing to see if there are any "captured" that are dive_type == "A"
 samp <- samp %>% 
-  filter(dive_type == "A")
+  filter(dive_type == "C")
 
 
 fish <- samp
