@@ -213,7 +213,10 @@ compare_dives <- function(list_of_dive_nums) {
 #' pit <- from_scanner(pitfile)
 
 from_scanner <- function(pitfile) {
-  pit <- readr::read_csv(pitfile, 
+  library(readr)
+  library(tibble)
+  library(tidyr)
+  pit <- readr::read_csv(pitfile, skip = 1,
     col_names = c("city", "tagid", "date", "time"), 
     col_types = cols(
       city = col_character(),
@@ -222,8 +225,9 @@ from_scanner <- function(pitfile) {
       time = col_character() # have to specify as string
     )
   )
-  pit <- distinct(pit)
-  pit <- tibble::as_tibble(pit) %>% # merge fields into tag number for fish
+  pit <- pit %>% 
+    distinct() %>% 
+    as_tibble() %>% 
     unite(scan, city, tagid, sep = "")
   return(pit)
 }
