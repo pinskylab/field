@@ -15,3 +15,7 @@ clownfilename <- str_c("data/clown_", Sys.time(), ".Rdata", sep = "")
 divefilename <- str_c("data/dive_", Sys.time(), ".Rdata", sep = "")
 save(clown, file = clownfilename)
 save(dive, file = divefilename)
+
+# # if the network connection is lost
+# load("data/clown_2018-03-22 06:00:16.Rdata")
+# load("data/dive_2018-03-22 06:11:58.Rdata")

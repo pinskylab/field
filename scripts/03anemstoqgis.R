@@ -63,7 +63,7 @@ no_gps <- anem %>%
   filter(is.na(obs_time))
 anem <- anti_join(anem, no_gps)
 
-# remove lines that are not anemones and remove weird dates that excel attaches
+# remove lines that are not anemones and remove weird dates that excel attaches and convert time zone
 anem <- anem %>%
   filter(!is.na(anem_spp)) %>% 
   mutate(obs_time = force_tz(ymd_hms(str_c(date, obs_time, sep = " ")), tzone = "Asia/Manila"), 
