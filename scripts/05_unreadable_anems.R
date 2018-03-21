@@ -4,7 +4,7 @@ library(lubridate)
 library(readr)
 source("scripts/field_helpers.R")
 
-# run the 00_pull_data... code and leave the tables loaded
+get_from_google()
 
 # find all of the instances of -9999 in the clown data sheet
 

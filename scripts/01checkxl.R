@@ -5,8 +5,9 @@ library(tidyverse)
 library(stringr)
 source("scripts/field_helpers.R")
 
-# run the 00_pull_data_from_google.R code and leave the tables loaded
+get_from_google()
 
+# if network connection is not available, find the latest save in the data folder ####
 
 # # if data is via csv
 # clown <- read.csv(stringsAsFactors = F, file = "data/2018_clownfish_data_entry - clownfish.csv")

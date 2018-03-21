@@ -11,20 +11,7 @@ source("scripts/readGPXGarmin.R")
 #   Read data and format
 # ---------------------------------------------
 
-# if data is accessible in google sheets: 
-library(googlesheets)
-# gs_auth(new_user = TRUE) # run this if having authorization problems
-mykey <- '1symhfmpQYH8k9dAvp8yV_j_wCTpIT8gO9No4s2OIQXo' # access the file
-entry <-gs_key(mykey)
-clown <-gs_read(entry, ws='clownfish')
-dive <- gs_read(entry, ws="diveinfo")
-
-# # save data in case network connection is lost
-# clownfilename <- str_c("data/clown_", Sys.time(), ".Rdata", sep = "")
-# divefilename <- str_c("data/dive_", Sys.time(), ".Rdata", sep = "")
-# save(clown, file = clownfilename)
-# save(dive, file = divefilename)
- 
+get_from_google()
 
 
 # # load data from saved if network connection is lost

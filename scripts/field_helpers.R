@@ -458,3 +458,31 @@ writeGPX = function(outfile, filename){
 }
 
 
+
+#' get_from_google
+#'
+#' This function pulls both the clownfish and diveinfo from the google spreadsheet 2018_clownfish_data_entry
+#' @keywords 
+#' @export
+#' @examples
+#' get_from_google()
+
+get_from_google <- function(){
+  # if data is accessible in google sheets:
+  library(googlesheets)
+  library(stringr)
+  # gs_auth(new_user = TRUE) # run this if having authorization problems
+  mykey <- '1symhfmpQYH8k9dAvp8yV_j_wCTpIT8gO9No4s2OIQXo' # access the file
+  entry <-gs_key(mykey)
+  clown <<-gs_read(entry, ws='clownfish')
+  dive <<- gs_read(entry, ws="diveinfo")
+  
+  # save data in case network connection is lost
+  clownfilename <- str_c("data/clown_", Sys.time(), ".Rdata", sep = "")
+  divefilename <- str_c("data/dive_", Sys.time(), ".Rdata", sep = "")
+  save(clown, file = clownfilename)
+  save(dive, file = divefilename)
+  
+  
+  
+}
