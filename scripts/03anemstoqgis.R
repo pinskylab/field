@@ -63,10 +63,8 @@ rm(lack) # if it is not zero, look into what is going on on the data sheet
 
 # remove lines that are not anemones and remove weird dates that excel attaches
 anem <- anem %>%
-  filter(!is.na(anem_spp)) %>% # get the date and time info for each anemone
-  mutate(obs_time = str_c(anem$date, anem$obs_time, sep = " "), 
-    obs_time = ymd_hms(anem$obs_time), 
-    obs_time = force_tz(anem$obs_time, tzone = "Asia/Manila"), 
+  filter(!is.na(anem_spp)) %>% 
+  mutate(obs_time = force_tz(ymd_hms(str_c(date, obs_time, sep = " ")), tzone = "Asia/Manila"), 
     gps = as.character(gps))
 
 # convert to UTC
