@@ -168,6 +168,15 @@ if (nrow(bad) > 0){
 }
 (problem <- rbind(problem, bad))
 
+# find samples that are lacking an anemone #### this needs to be added to problem - haven't tested -MRS
+(lack <- clown %>%
+    filter(is.na(anem_id), !is.na(fish_spp)) %>% 
+    select(dive_num, obs_time, tag_id, fin_id, notes) %>% 
+    filter(!is.na(fin_id) | !is.na(tag_id)))
+
+# if this is zero,
+rm(lack) # if it is not zero, look into what is going on on the data sheet
+
 # are there missing anemone tag numbers on the clownfish sheet?  #### - begin with the starting anem number for this field season
   # gather the used ids
 anem_ids <- clown %>% 
