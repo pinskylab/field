@@ -5,6 +5,7 @@ library(tidyverse)
 library(stringr)
 source("scripts/field_helpers.R")
 
+<<<<<<< HEAD
 # if data is accessible in google sheets:
 library(googlesheets)
 # gs_auth(new_user = TRUE) # run this if having authorization problems
@@ -23,7 +24,11 @@ dive <- gs_read(entry, ws="diveinfo")
 # THIS HAS TO BE MANUALLY UPDATED WITH MOST CURRENT VERSION OF SAVED FILE  - COULD WRITE CODE TO FIND AND LOAD THE MOST CURRENT VERSION ####
 # load(file = "data/clown_2018-03-18 20:18:57.Rdata")
 # load(file = "data/dive_2018-03-18 20:18:57.Rdata")
+=======
+get_from_google()
+>>>>>>> e6fc8d9baf55c896f400a2eee652f13cd30b49a2
 
+# if network connection is not available, find the latest save in the data folder ####
 
 # # if data is via csv
 # clown <- read.csv(stringsAsFactors = F, file = "data/2018_clownfish_data_entry - clownfish.csv")
@@ -167,6 +172,15 @@ if (nrow(bad) > 0){
   bad$typeo <- "fin_id is missing"
 }
 (problem <- rbind(problem, bad))
+
+# find samples that are lacking an anemone #### this needs to be added to problem - haven't tested -MRS
+(lack <- clown %>%
+    filter(is.na(anem_id), !is.na(fish_spp)) %>% 
+    select(dive_num, obs_time, tag_id, fin_id, notes) %>% 
+    filter(!is.na(fin_id) | !is.na(tag_id)))
+
+# if this is zero,
+rm(lack) # if it is not zero, look into what is going on on the data sheet
 
 # are there missing anemone tag numbers on the clownfish sheet?  #### - begin with the starting anem number for this field season
   # gather the used ids

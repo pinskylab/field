@@ -16,13 +16,7 @@ source("scripts/field_helpers.R")
 # ---------------------------------------------
 # surv <- excl("diveinfo", NULL)
 
-# if data is accessible in google sheets:
-library(googlesheets)
-# gs_auth(new_user = TRUE) # run this if having authorization problems
-mykey <- '1symhfmpQYH8k9dAvp8yV_j_wCTpIT8gO9No4s2OIQXo' # access the file
-entry <-gs_key(mykey)
-clown <-gs_read(entry, ws='clownfish')
-dive <- gs_read(entry, ws="diveinfo")
+get_from_google()
 
 # # load data from saved if network connection is lost
 # # THIS HAS TO BE MANUALLY UPDATED WITH MOST CURRENT VERSION OF SAVED FILE  - COULD WRITE CODE TO FIND AND LOAD THE MOST CURRENT VERSION ####

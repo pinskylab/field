@@ -87,6 +87,7 @@ for (l in 1:length(gps)){
 }
 
 gpx <- gpx %>%
+  mutate(year = year(time)) %>% 
   mutate(month = month(time)) %>%
   mutate(day = day(time)) %>%
   mutate(hour = hour(time)) %>%
