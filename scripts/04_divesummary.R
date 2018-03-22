@@ -11,8 +11,8 @@ get_from_google()
 
 # # load data from saved if network connection is lost
 # # THIS HAS TO BE MANUALLY UPDATED WITH MOST CURRENT VERSION OF SAVED FILE  - COULD WRITE CODE TO FIND AND LOAD THE MOST CURRENT VERSION ####
-# load(file = "data/clown_2018-03-12 21:13:51.Rdata")
-# load(file = "data/dive_2018-03-12 21:13:52.Rdata")
+load(file = "data/clown_2018-03-22 18:42:52.Rdata")
+load(file = "data/dive_2018-03-22 18:42:52.Rdata")
 
 # fish observation info from anem survey
 fish <- clown
