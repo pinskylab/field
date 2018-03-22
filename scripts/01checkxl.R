@@ -5,13 +5,13 @@ library(tidyverse)
 library(stringr)
 source("scripts/field_helpers.R")
 
-# # if data is accessible in google sheets:
-# library(googlesheets)
-# # gs_auth(new_user = TRUE) # run this if having authorization problems
-# mykey <- '1symhfmpQYH8k9dAvp8yV_j_wCTpIT8gO9No4s2OIQXo' # access the file
-# entry <-gs_key(mykey)
-# clown <-gs_read(entry, ws='clownfish')
-# dive <- gs_read(entry, ws="diveinfo")
+# if data is accessible in google sheets:
+library(googlesheets)
+# gs_auth(new_user = TRUE) # run this if having authorization problems
+mykey <- '1symhfmpQYH8k9dAvp8yV_j_wCTpIT8gO9No4s2OIQXo' # access the file
+entry <-gs_key(mykey)
+clown <-gs_read(entry, ws='clownfish')
+dive <- gs_read(entry, ws="diveinfo")
 
 # # save data in case network connection is lost
 # clownfilename <- str_c("data/clown_", Sys.time(), ".Rdata", sep = "")
@@ -21,8 +21,8 @@ source("scripts/field_helpers.R")
 
 # load data from saved if network connection is lost
 # THIS HAS TO BE MANUALLY UPDATED WITH MOST CURRENT VERSION OF SAVED FILE  - COULD WRITE CODE TO FIND AND LOAD THE MOST CURRENT VERSION ####
-load(file = "data/clown_2018-03-18 20:18:57.Rdata")
-load(file = "data/dive_2018-03-18 20:18:57.Rdata")
+# load(file = "data/clown_2018-03-18 20:18:57.Rdata")
+# load(file = "data/dive_2018-03-18 20:18:57.Rdata")
 
 
 # # if data is via csv
