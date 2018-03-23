@@ -216,7 +216,7 @@ from_scanner <- function(pitfile) {
   library(readr)
   library(tibble)
   library(tidyr)
-  pit <- readr::read_csv(pitfile, skip = 1,
+  pit <- readr::read_csv(pitfile,
     col_names = c("city", "tagid", "date", "time"), 
     col_types = cols(
       city = col_character(),
