@@ -140,11 +140,11 @@ out <- anem
 # out <- rbind(fish,anem)
 out <- distinct(out)
 
-# get each anemone down to one observation - this is just anem_id and lat long, no extra info here
-out <- out %>%
-  group_by(anem_id) %>%
-  summarise(mlat = mean(lat, na.rm = TRUE),
-    mlon = mean(lon, na.rm = T))
+# # get each anemone down to one observation - this is just anem_id and lat long, no extra info here
+# out <- out %>%
+#   group_by(anem_id) %>%
+#   summarise(mlat = mean(lat, na.rm = TRUE),
+#     mlon = mean(lon, na.rm = T))
 
 
 write_csv(out, str_c("data/GPSSurvey_anemlatlon_forQGIS_2018_", Sys.Date(), ".csv", sep = ""))
