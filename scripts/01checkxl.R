@@ -15,8 +15,9 @@ get_from_google()
 
 # include pit tag scanner output
 pitfile <- ("data/BioTerm.txt")
-oldpitfile <- ("data/BioTerm_old.txt") #download file from first pit tag scanner (in use through 21 March 2018)
- # pitfile <- ("~/Downloads/BioTerm.txt" )
+#download file from first pit tag scanner (in use through 21 March 2018)
+oldpitfile <- ("data/BioTerm_old.txt") 
+ 
 
 problem <- data.frame()
 
@@ -176,7 +177,10 @@ y <- data.frame(x) %>%
 
 bad <- anti_join(y, anem_ids)
 if (nrow(bad) > 0){
-  bad$typeo <- "anem_id is missing"
+  bad <- bad %>% 
+    mutate(typeo = "anem_id is missing", 
+      fin_id = NA)
+ problem <- mutate(problem, anem_id = NA)
 }
 (problem <- rbind(problem, bad))
 
