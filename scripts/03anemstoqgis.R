@@ -135,7 +135,7 @@ anem %>%
 # fish <- select(fish, lat, lon, notes, obs_time, site, anem_id)
 # # what isn't in fish?
 anem <- anem %>%
-  select(lat, lon, obs_time, site, anem_id) ##ALLISON NOTE: added year hear b/c was needed in write_csv line below ## MRS - removed year because it doesn't exist in the table?
+  select(lat, lon, obs_time, site, anem_id) ##ALLISON NOTE: added year here b/c was needed in write_csv line below ## MRS - removed year because it doesn't exist in the table?
 out <- anem
 # out <- rbind(fish,anem)
 out <- distinct(out)
