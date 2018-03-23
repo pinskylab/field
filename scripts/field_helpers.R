@@ -270,29 +270,6 @@ used_gps <- function(gps) {
   return(gps)
 }
 
-# prep_gpx ####
-#' is a function that reads a gpx file and parses out the useable data. 
-#' @export
-#' @name prep_gpx
-#' @author Michelle Stuart
-#' @param gps = list of gps units
-#' @param files = list of track files
-#' @examples 
-#' dat <- parse_gpx(gps, files)
-
-prep_gpx <- function(gps, files) {
-  infile <- readGPXGarmin(paste("data/", gps[l], "/", files[i], sep="")) # list of 2 itmes, header and data
-  header <<- infile$header
-  dat <- infile$data
-  dat$time <- ymd_hms(dat$time)
-  instarttime <<-  dat$time[1] # start time for this GPX track
-  inendtime <<- dat$time[nrow(dat)] # end time for this GPX track
-  dat$elev <- 0 # change elevation to zero
-  dat$unit <- substr(gps[l],4,4)
-  return(dat)
-}
-
-
 
 # index_line ####
 #' a function that reads through each line of an index and writes an output file in gpx format
@@ -516,7 +493,16 @@ assign_gpx_field <- function(id_table){
   for (l in 1:length(gps)){
     files <- list.files(path = paste("data/",gps[l], sep = ""), pattern = "*Track*")
     for(i in 1:length(files)){ # for each file
-      dat <- prep_gpx(gps[l], files) # parse the gpx into useable data
+     # parse the gpx into useable data
+        infile <- readGPXGarmin(paste("data/", gps[l], "/", files[i], sep="")) # list of 2 itmes, header and data
+        header <<- infile$header
+        dat <- infile$data
+        dat$time <- ymd_hms(dat$time)
+        instarttime <<-  dat$time[1] # start time for this GPX track
+        inendtime <<- dat$time[nrow(dat)] # end time for this GPX track
+        dat$elev <- 0 # change elevation to zero
+        dat$unit <- substr(gps[l],4,4)
+    
       gpx <- rbind(gpx, dat)
     }
   }
@@ -547,7 +533,7 @@ assign_gpx_field <- function(id_table){
       mlon = mean(lon, na.rm = T))
   
   # drop all of the unneccessary columns from anem and join with the coord
-  id_table <- select(id_table, contains("id"))
+  id_table <- select(id_table, contains("id"), gps, dive_num)
   
   id_table <- left_join(coord, id_table, by = "id") %>% 
     rename(lat = mlat, 
