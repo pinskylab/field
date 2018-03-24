@@ -5,15 +5,15 @@ library(tidyverse)
 library(stringr)
 source("scripts/field_helpers.R")
 
-# get_from_google()
+get_from_google()
 
-# if network connection is not available, find the latest save in the data folder ####
-# load data from saved if network connection is lost ####
-# get list of files
-clown_files <- sort(list.files(path = "data/google_sheet_backups/", pattern = "clown_201*"), decreasing = T)
-dive_files <- sort(list.files(path = "data/google_sheet_backups/", pattern = "dive_201*"), decreasing = T)
-load(file = paste("data/google_sheet_backups/", clown_files[1], sep = ""))
-load(file = paste("data/google_sheet_backups/", dive_files[1], sep = ""))
+# # if network connection is not available, find the latest save in the data folder ####
+# # load data from saved if network connection is lost ####
+# # get list of files
+# clown_files <- sort(list.files(path = "data/google_sheet_backups/", pattern = "clown_201*"), decreasing = T)
+# dive_files <- sort(list.files(path = "data/google_sheet_backups/", pattern = "dive_201*"), decreasing = T)
+# load(file = paste("data/google_sheet_backups/", clown_files[1], sep = ""))
+# load(file = paste("data/google_sheet_backups/", dive_files[1], sep = ""))
 
 # # if data is via csv
 # clown <- read.csv(stringsAsFactors = F, file = "data/2018_clownfish_data_entry - clownfish.csv")
@@ -193,12 +193,14 @@ if (nrow(bad) > 0){
 # are there anemones listed at a different site than they were in other years? Don't include new tags - in 2018 2938 was first tag ####
 
   # field use
-anem_db <- read.csv("data/anemones.csv", stringsAsFactors = F) %>% 
+load("data/db_backups/anemones_db.Rdata")
+ anem_db <- anem %>% 
     select(anem_table_id, dive_table_id, anem_id) %>%
     filter(!is.na(anem_id), anem_id != "-9999", anem_id != "NULL") %>%
   mutate(dive_table_id = as.numeric(dive_table_id))
 
-  dive_db <- read.csv("data/diveinfo.csv", stringsAsFactors = F) %>%
+ load("data/db_backups/diveinfo_db.Rdata")
+  dive_db <- dive %>%
     select(dive_table_id, site) 
   
 anem_db <- left_join(anem_db, dive_db, by = "dive_table_id")
@@ -214,7 +216,8 @@ anem_site <- anem_db %>%
     distinct() %>% 
     mutate(anem_id = as.character(anem_id))
   new_anem_site <- left_join(anem, dive, by = "dive_num") %>% 
-    select(dive_num, anem_id, site)
+    select(dive_num, anem_id, site) %>% 
+    mutate(anem_id = as.integer(anem_id))
   
   # compare the two tables # diff 
   bad <- left_join(new_anem_site, anem_site, by = "anem_id") %>% 
