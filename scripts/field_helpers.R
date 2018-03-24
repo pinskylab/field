@@ -477,8 +477,7 @@ assign_gpx_field <- function(id_table){
       hour = hour(obs_time), 
       min = minute(obs_time), 
       sec = second(obs_time), 
-      year = year(obs_time), 
-      id = 1:nrow(id_table))
+      year = year(obs_time))
   
   # create table of lat lon data ####
   # make an empty data frame for later
@@ -533,7 +532,7 @@ assign_gpx_field <- function(id_table){
       mlon = mean(lon, na.rm = T))
   
   # drop all of the unneccessary columns from anem and join with the coord
-  id_table <- select(id_table, contains("id"), gps, dive_num)
+  id_table <- select(id_table, contains("id"), gps, dive_num, obs_time)
   
   id_table <- left_join(coord, id_table, by = "id") %>% 
     rename(lat = mlat, 
