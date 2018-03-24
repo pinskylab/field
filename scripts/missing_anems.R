@@ -1,4 +1,4 @@
-# find the anems that we have not visited this year
+# find the anems that we have not visited this year and create a file that can be mapped
 library(dplyr)
 
 # get a list of anems from previous years
