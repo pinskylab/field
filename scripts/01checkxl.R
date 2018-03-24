@@ -230,8 +230,18 @@ anem_site <- anem_db %>%
   }
   (problem <- rbind(problem, bad))
   
-# make sure the anem_obs is all on one line ####
+# is an anemone observed more than once?
+  obs_anem <- clown %>% 
+    filter(!is.na(anem_spp)) %>% 
+    group_by(anem_id) %>% 
+    summarise(count = n()) %>% 
+    filter(count > 1)
   
+  # is data in a weird place?
+  misplaced <- clown %>% 
+    filter(is.na(anem_spp), 
+      !is.na(depth) | !is.na(gps) |
+      !is.na(anem_dia) | !is.na(egg_height))
   
   
 # ---------------------------------------------
