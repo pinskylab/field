@@ -4,8 +4,8 @@
 library(tidyverse)
 library(stringr)
 source("scripts/field_helpers.R")
-
-# get_from_google()
+ 
+get_from_google()
 
 # if network connection is not available, find the latest save in the data folder ####
 # load data from saved if network connection is lost ####
