@@ -8050,7 +8050,7 @@ Changed fin_id and sample_id from APCL12_047 to NULL on the 8.1cm fish (fish_tab
 7598,7321,"APPE","9",NULL,NULL,NULL,NULL,NULL,NULL,NULL,"MRS",NULL,NULL,NULL,NULL
 2771,2340,"APCL","4.5","395","APCL14_395","W",NULL,NULL,NULL,NULL,"MRS",NULL,NULL,NULL,NULL
 7597,7321,"APPE","9",NULL,NULL,NULL,NULL,NULL,NULL,NULL,"MRS",NULL,NULL,NULL,NULL
-7596,7319,"APCL","5.1","289","APCL16_289","YR",NULL,"N","985153000402908","These fish swim back and forth between anem 2306 and 2307","MRS",NULL,NULL,NULL,NULL
+7596,7319,"APCL","5.1","289","APCL16_289","YR",NULL,"N","985153000402908","These fish swim back and forth between anem 2306 and 2307","MRS","Y","2018-03-24","MRS","Changed tag_id from 407490 to 402908 based on scan time and fish description"
 7594,7319,"APCL","10.6","287","APCL16_287","O",NULL,"N","985153000404325","These fish swim back and forth between anem 2306 and 2307","MRS",NULL,NULL,NULL,NULL
 7592,7319,"APCL","5.6","285","APCL16_285","YR",NULL,"N","985153000403806","These fish swim back and forth between anem 2306 and 2307","MRS",NULL,NULL,NULL,NULL
 7591,7318,"APCL","3",NULL,NULL,NULL,NULL,NULL,NULL,NULL,"MRS",NULL,NULL,NULL,NULL
