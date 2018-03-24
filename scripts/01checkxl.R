@@ -4,11 +4,7 @@
 library(tidyverse)
 library(stringr)
 source("scripts/field_helpers.R")
-<<<<<<< HEAD
- 
-=======
 
->>>>>>> d7cef44b2ddd8ec1e0b68471aa39f28ece2f7af8
 get_from_google()
 
 # # if network connection is not available, find the latest save in the data folder ####
