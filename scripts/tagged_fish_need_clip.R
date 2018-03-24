@@ -6,25 +6,25 @@
 library(dplyr)
 library(lubridate)
 library(readr)
-source("scripts/field_helpers.R")
-
-# import data from database in the field (no network connection)
-
-# create rdata from db_backups 
-clown <- read_csv(file = "data/db_backups/clownfish.csv")
-save(clown, file = "data/clownfish_db.Rdata")
-
-# Load database files stored in fields repository
-anems <- read.csv("data/anemones.csv", stringsAsFactors = FALSE, na="NULL") %>%
-  mutate(anem_table_id = as.numeric(anem_table_id), dive_table_id = as.numeric(dive_table_id)) #get a warning message that NAs introduced by coercion - but they should all be numbers?...
-fish <- read.csv("data/clownfish.csv", stringsAsFactors = FALSE, na="NULL")
-dives <- read.csv("data/diveinfo.csv", stringsAsFactors = FALSE, na="NULL")
-#gps <- read.csv("data/GPX.csv", stringsAsFactors = FALSE)
 
 #################### Functions: ####################
+source("scripts/field_helpers.R")
 
 #################### Running things: ####################
-##### Consolidate database info
+# # import data from database in the field (no network connection)
+# clown <- read_csv(file = "data/db_backups/clownfish.csv")
+# create rdata from db_backups 
+# save(clown, file = "data/clownfish_db.Rdata")
+load(file = "data/clownfish_db.Rdata")
+
+# # import data from database in NJ
+# leyte <- read_db("Leyte")
+# clown <- leyte %>% 
+#   tbl("clownfish") %>% 
+#   collect()
+
+
+# Consolidate database info ####
 allfish_fish <- fish %>%
   select(fish_table_id, anem_table_id, fish_spp, sample_id, cap_id, anem_table_id, recap, tag_id, color, size) %>%
   collect() 
