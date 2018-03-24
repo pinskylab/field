@@ -455,8 +455,8 @@ get_from_google <- function(){
   dive <<- gs_read(entry, ws="diveinfo")
   
   # save data in case network connection is lost
-  clownfilename <- str_c("data/clown_", Sys.time(), ".Rdata", sep = "")
-  divefilename <- str_c("data/dive_", Sys.time(), ".Rdata", sep = "")
+  clownfilename <- str_c("data/google_sheet_backups/clown_", Sys.time(), ".Rdata", sep = "")
+  divefilename <- str_c("data/google_sheet_backups/dive_", Sys.time(), ".Rdata", sep = "")
   save(clown, file = clownfilename)
   save(dive, file = divefilename)
 }
