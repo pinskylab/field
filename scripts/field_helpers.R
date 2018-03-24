@@ -216,7 +216,7 @@ from_scanner <- function(pitfile) {
   library(readr)
   library(tibble)
   library(tidyr)
-  pit <- readr::read_csv(pitfile, skip = 1,
+  pit <- readr::read_csv(pitfile,
     col_names = c("city", "tagid", "date", "time"), 
     col_types = cols(
       city = col_character(),
@@ -269,29 +269,6 @@ used_gps <- function(gps) {
   gps <- gps[!is.na(gps)]
   return(gps)
 }
-
-# prep_gpx ####
-#' is a function that reads a gpx file and parses out the useable data. 
-#' @export
-#' @name prep_gpx
-#' @author Michelle Stuart
-#' @param x = gps - list of gps units
-#' @param y = files - list of track files
-#' @examples 
-#' dat <- parse_gpx(gps, files)
-
-prep_gpx <- function(x, y) {
-  infile <- readGPXGarmin(paste("data/", x[l], "/", y[i], sep="")) # list of 2 itmes, header and data
-  header <<- infile$header
-  dat <- infile$data
-  dat$time <- ymd_hms(dat$time)
-  instarttime <<-  dat$time[1] # start time for this GPX track
-  inendtime <<- dat$time[nrow(dat)] # end time for this GPX track
-  dat$elev <- 0 # change elevation to zero
-  dat$unit <- substr(x[l],4,4)
-  return(dat)
-}
-
 
 
 # index_line ####
@@ -478,11 +455,87 @@ get_from_google <- function(){
   dive <<- gs_read(entry, ws="diveinfo")
   
   # save data in case network connection is lost
-  clownfilename <- str_c("data/clown_", Sys.time(), ".Rdata", sep = "")
-  divefilename <- str_c("data/dive_", Sys.time(), ".Rdata", sep = "")
+  clownfilename <- str_c("data/google_sheet_backups/clown_", Sys.time(), ".Rdata", sep = "")
+  divefilename <- str_c("data/google_sheet_backups/dive_", Sys.time(), ".Rdata", sep = "")
   save(clown, file = clownfilename)
   save(dive, file = divefilename)
+}
+
+# assign_gpx_field ####
+#' assign lat lons to a table from field data (directory of gpx files)
+#' @export
+#' @name assign_gpx
+#' @author Michelle Stuart
+#' @param id_table = a table that contains an id, gps_unit, and date_time in UTC
+#' @examples 
+#' result <- assign_gpx_field(anem_table)
+assign_gpx_field <- function(id_table){
+  library(lubridate)
+  id_table <- id_table %>% 
+    mutate(month = month(obs_time), 
+      day = day(obs_time), 
+      hour = hour(obs_time), 
+      min = minute(obs_time), 
+      sec = second(obs_time), 
+      year = year(obs_time))
+  
+  # create table of lat lon data ####
+  # make an empty data frame for later
+  gpx <- data.frame()
+  
+  # define the list of gps units
+  gps <- name_gps()
+  
+  # determine which gps units have data & remove empties
+  gps <- used_gps(gps)
+  
+  for (l in 1:length(gps)){
+    files <- list.files(path = paste("data/",gps[l], sep = ""), pattern = "*Track*")
+    for(i in 1:length(files)){ # for each file
+     # parse the gpx into useable data
+        infile <- readGPXGarmin(paste("data/", gps[l], "/", files[i], sep="")) # list of 2 itmes, header and data
+        header <<- infile$header
+        dat <- infile$data
+        dat$time <- ymd_hms(dat$time)
+        instarttime <<-  dat$time[1] # start time for this GPX track
+        inendtime <<- dat$time[nrow(dat)] # end time for this GPX track
+        dat$elev <- 0 # change elevation to zero
+        dat$unit <- substr(gps[l],4,4)
+    
+      gpx <- rbind(gpx, dat)
+    }
+  }
+  
+  gpx <- gpx %>%
+    mutate(month = month(time), 
+      day = day(time), 
+      hour = hour(time), 
+      min = minute(time), 
+      sec = second(time), 
+      year = year(time), 
+      lat = as.character(lat), # to prevent from importing as factors
+      lon = as.character(lon), 
+      time = as.character(time)) %>% 
+    rename(gps = unit)
   
   
   
+  # find matches for times to assign lat long - there are more than one set of seconds (sec.y) that match
+  id_table <- left_join(id_table, gpx, by = c("gps", "month", "day", "hour", "min", "year")) %>% 
+    mutate(lat = as.numeric(lat), 
+      lon = as.numeric(lon)) # need to make decimal 5 digits - why? because that is all the gps can hold
+  
+  # calculate a mean lat lon for each anem observation
+  coord <- id_table %>%
+    group_by(id) %>% # id should be referring to one row of the data
+    summarise(mlat = mean(lat, na.rm = TRUE),
+      mlon = mean(lon, na.rm = T))
+  
+  # drop all of the unneccessary columns from anem and join with the coord
+  id_table <- select(id_table, contains("id"), gps, dive_num, obs_time)
+  
+  id_table <- left_join(coord, id_table, by = "id") %>% 
+    rename(lat = mlat, 
+      lon = mlon)
+  return(id_table)
 }

@@ -9,10 +9,12 @@ source("scripts/field_helpers.R")
 
 get_from_google()
 
-# # load data from saved if network connection is lost
-# # THIS HAS TO BE MANUALLY UPDATED WITH MOST CURRENT VERSION OF SAVED FILE  - COULD WRITE CODE TO FIND AND LOAD THE MOST CURRENT VERSION ####
-load(file = "data/clown_2018-03-22 18:42:52.Rdata")
-load(file = "data/dive_2018-03-22 18:42:52.Rdata")
+# # load data from saved if network connection is lost ####
+# # get list of files
+# clown_files <- sort(list.files(path = "data/google_sheet_backups/", pattern = "clown_201*"), decreasing = T)
+# dive_files <- sort(list.files(path = "data/google_sheet_backups/", pattern = "dive_201*"), decreasing = T)
+# load(file = paste("data/google_sheet_backups/", clown_files[1], sep = ""))
+# load(file = paste("data/google_sheet_backups/", dive_files[1], sep = ""))
 
 # fish observation info from anem survey
 fish <- clown
@@ -183,8 +185,8 @@ divetotsum <- divetot %>% #calculate site totals from divetot, can compare to si
   summarise(site_observed = sum(observed), 
     site_captured = sum(captured, na.rm = TRUE), 
     site_fins = sum(fins, na.rm = TRUE), 
-    site_recap = sum(recap, na.rm = TRUE), 
-    site_clipped_recaps = sum(clipped_recaps, na.rm = TRUE))
+    site_recap = sum(recap, na.rm = TRUE))
+    # site_clipped_recaps = sum(clipped_recaps, na.rm = TRUE))
 
 # #are the observed fish per site the same fish recaptured more than once in a season? (will print message if so, if no message all is good) #doesn't quite work b/c doesn't compare NAs (in sitetot) to 0s (in divetotsum) correctly
 # for (i in 1:length(divetotsum$site)) {
@@ -208,7 +210,8 @@ View(sitetot)
 View(divetot)
 # save(divetot, file = "data/divetot.Rdata")
 
-total_cap <- sitetot %>% 
+(total_cap <- sitetot %>% 
   summarise(sum_obs = sum(observed), 
-    sum_cap = sum(finclip) + sum(recap, na.rm = T), 
-    sum_finclip = sum(finclip), sum_recap = sum(recap, na.rm = T))
+    sum_cap = sum(finclip, na.rm = T) + sum(recap, na.rm = T), 
+    sum_finclip = sum(finclip, na.rm = T), sum_recap = sum(recap, na.rm = T)))
+

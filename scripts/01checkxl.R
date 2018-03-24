@@ -5,9 +5,15 @@ library(tidyverse)
 library(stringr)
 source("scripts/field_helpers.R")
 
-get_from_google()
+# get_from_google()
 
 # if network connection is not available, find the latest save in the data folder ####
+# load data from saved if network connection is lost ####
+# get list of files
+clown_files <- sort(list.files(path = "data/google_sheet_backups/", pattern = "clown_201*"), decreasing = T)
+dive_files <- sort(list.files(path = "data/google_sheet_backups/", pattern = "dive_201*"), decreasing = T)
+load(file = paste("data/google_sheet_backups/", clown_files[1], sep = ""))
+load(file = paste("data/google_sheet_backups/", dive_files[1], sep = ""))
 
 # # if data is via csv
 # clown <- read.csv(stringsAsFactors = F, file = "data/2018_clownfish_data_entry - clownfish.csv")
@@ -15,8 +21,9 @@ get_from_google()
 
 # include pit tag scanner output
 pitfile <- ("data/BioTerm.txt")
-oldpitfile <- ("data/BioTerm_old.txt") #download file from first pit tag scanner (in use through 21 March 2018)
- # pitfile <- ("~/Downloads/BioTerm.txt" )
+#download file from first pit tag scanner (in use through 21 March 2018)
+oldpitfile <- ("data/BioTerm_old.txt") 
+ 
 
 problem <- data.frame()
 
@@ -176,7 +183,10 @@ y <- data.frame(x) %>%
 
 bad <- anti_join(y, anem_ids)
 if (nrow(bad) > 0){
-  bad$typeo <- "anem_id is missing"
+  bad <- bad %>% 
+    mutate(typeo = "anem_id is missing", 
+      fin_id = NA)
+ problem <- mutate(problem, anem_id = NA)
 }
 (problem <- rbind(problem, bad))
 
@@ -219,6 +229,21 @@ anem_site <- anem_db %>%
     bad$typeo <- "anem site does not match previous year"
   }
   (problem <- rbind(problem, bad))
+  
+# is an anemone observed more than once?
+  obs_anem <- clown %>% 
+    filter(!is.na(anem_spp)) %>% 
+    group_by(anem_id) %>% 
+    summarise(count = n()) %>% 
+    filter(count > 1)
+  
+  # is data in a weird place?
+  misplaced <- clown %>% 
+    filter(is.na(anem_spp), 
+      !is.na(depth) | !is.na(gps) |
+      !is.na(anem_dia) | !is.na(egg_height))
+  
+  # someday when we want to separate multiple fish on one untagged anem to make it not look like multiple anems, can check if the time is the same for multiple fish (or is time the same for identical anems) - this won't work well because it will be hard to tell if it is more than one anem or one anem recorded several times.
   
   
 # ---------------------------------------------
