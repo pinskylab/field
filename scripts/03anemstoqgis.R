@@ -94,7 +94,5 @@ out <- distinct(out)
 #     mlon = mean(lon, na.rm = T))
 
 
-write_csv(out, str_c("data/GPSSurvey_anemlatlon_forQGIS_2018_", Sys.Date(), ".csv", sep = ""))
-
-### MOVE THIS CSV TO THE PHILS_GIS_R DATA DIRECTORY ###
+write_csv(out, str_c("../Phils_GIS_R/data/Anems/GPSSurvey_anemlatlon_forQGIS_2018_", Sys.Date(), ".csv", sep = ""))
 
