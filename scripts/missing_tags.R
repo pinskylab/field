@@ -6,31 +6,20 @@ library(lubridate)
 library(stringr)
 source("scripts/field_helpers.R")
 
-# get currently scanned fish
-# # if data is accessible in google sheets:
-# library(googlesheets)
-# # gs_auth(new_user = TRUE) # run this if having authorization problems
-# mykey <- '1symhfmpQYH8k9dAvp8yV_j_wCTpIT8gO9No4s2OIQXo' # access the file
-# entry <-gs_key(mykey)
-# clown <-gs_read(entry, ws='clownfish')
-# dive <- gs_read(entry, ws="diveinfo")
-# 
-# # # save data in case network connection is lost
-# clownfilename <- str_c("data/clown_", Sys.time(), ".Rdata", sep = "")
-# divefilename <- str_c("data/dive_", Sys.time(), ".Rdata", sep = "")
-
-# clown <- clown %>%  # adapt time because having trouble with time loading as numeric
-#   mutate(obs_time = as.character(obs_time))
-# save(clown, file = clownfilename)
-# save(dive, file = divefilename)
+# get currently scanned fish ####
+# get_from_google()
 
 # load data from saved if network connection is lost
-# THIS HAS TO BE MANUALLY UPDATED WITH MOST CURRENT VERSION OF SAVED FILE  - COULD WRITE CODE TO FIND AND LOAD THE MOST CURRENT VERSION ####
-load(file = "data/clown_2018-03-20 02:38:39.Rdata")
-load(file = "data/dive_2018-03-20 02:38:39.Rdata")
+# get list of files
+clown_files <- sort(list.files(path = "data/google_sheet_backups/", pattern = "clown_201*"), decreasing = T)
+dive_files <- sort(list.files(path = "data/google_sheet_backups/", pattern = "dive_201*"), decreasing = T)
+load(file = paste("data/google_sheet_backups/", clown_files[1], sep = ""))
+load(file = paste("data/google_sheet_backups/", dive_files[1], sep = ""))
+
+# at this point there is a clown table of newly collected field data and a dive table of newly collected field data
 
 # ---------------------------------------------
-#   format tag ids on clownfish data sheet
+#   format tag ids on clownfish data sheet ####
 # ---------------------------------------------
 clown <- clown %>% 
   mutate(tag_id = stringr::str_replace(tag_id, "9851_", "985153000")) %>% 
@@ -54,8 +43,11 @@ dive <- dive %>%
   filter(gps == 4)
 
 present <- left_join(present, dive, by = "dive_num") %>% 
-  select(-dive_num) %>% 
+  select(-dive_num) 
+
+present <- present %>% 
   mutate(time = ymd_hms(str_c(date, obs_time, sep = " ")))
+rm(clown, dive)
 
 # add data from database #### 
 # # on campus
@@ -64,19 +56,26 @@ present <- left_join(present, dive, by = "dive_num") %>%
 #   tbl("clownfish") %>% 
 # filter(!is.na(tag_id))
 
-# in the field this is as a csv
-past <- read.csv(stringsAsFactors = F, file = "data/clownfish.csv", na = "NULL") %>% 
+# in the field this is as Rdata
+load(file = "data/db_backups/clownfish_db.Rdata")
+load(file = "data/db_backups/anemones_db.Rdata") 
+load(file = "data/db_backups/diveinfo_db.Rdata")
+
+past <- clown %>% 
   filter(!is.na(tag_id)) %>% 
-  select(anem_table_id, tag_id, size, color)# include fields to assign a date and time, also size 
-anem <- read.csv(stringsAsFactors = F, na = "NULL", file = "data/anemones.csv") %>% 
+  # include fields to assign a date and time, also size 
+  select(anem_table_id, tag_id, size, color)
+
+anem <- anem %>% 
   filter(anem_table_id %in% past$anem_table_id) %>% 
   select(anem_table_id, dive_table_id, obs_time)
 past <- left_join(past, anem, by = "anem_table_id")
-dive <- read.csv(stringsAsFactors = F, na = "NULL", file = "data/diveinfo.csv") %>% 
+
+dive <- dive %>% 
   filter(dive_table_id %in% past$dive_table_id) %>% 
   select(dive_table_id, date, gps)
 past <- left_join(past, dive, by = "dive_table_id") %>% 
-  mutate(time = ymd_hms(str_c(date, obs_time, sep = " ")), 
+  mutate(time = ymd_hms(str_c(date, obs_time, sep = " ")),
     tag_id = as.character(tag_id)) %>% 
   select(-contains("table")) %>% 
   rename(old_size = size, 
@@ -149,8 +148,14 @@ past <- past %>%
   select(-time, -sec)
 
 # pull in the gpx data
-gpx <- read.csv(stringsAsFactors = F, na = "NULL", file = "data/GPX.csv") %>% 
-  mutate(time = ymd_hms(time))
+# gpx <- read.csv(file = "data/db_backups/GPX.csv", na = "NULL", stringsAsFactors = F)
+# # # create rdata from db_backups
+# save(gpx, file = "data/db_backups/gpx_db.Rdata")
+load(file = "data/db_backups/gpx_db.Rdata")
+
+gpx <- gpx %>% 
+  mutate(time = ymd_hms(time)) %>% 
+  select(-elev)
 
 # format for comparison with table
 gpx <- gpx %>%
@@ -167,22 +172,25 @@ gpx <- gpx %>%
 
 # find matches for times to assign lat long - there are more than one set of seconds (sec.y) that match
 past <- left_join(past, gpx)
-rm(gpx)
+rm(gpx, clown, dive)
 # # failed to assign lat lon - none failed as of 2018-03-20
+
 # fail <- test %>% 
 #   filter(is.na(lat))
 past <- past %>% 
-  mutate(lat = as.numeric(lat), 
-    lon = as.numeric(lon)) # need to make decimal 5 digits - why? because that is all the gps can hold
+  # the gps can only hold 5 digits after the decimal
+  mutate(lat = formatC(as.numeric(lat), digits = 7), 
+    lon = formatC(as.numeric(lon), digits = 8))
 
 past <- past %>% 
-  select(-sec, -time, -elev, -month, -day, -hour, -min, -year) %>% 
-  distinct()
-
+  select(-sec, -time, -month, -day, -hour, -min, -year) %>% 
+  distinct() %>% 
+  mutate(lat = as.numeric(lat), 
+    lon = as.numeric(lon))
 
 coord <- past %>%
   group_by(tag_id) %>%
-  summarise(mlat = mean(lat, na.rm = TRUE),
+  summarise(mlat = mean(lat, na.rm = T),
     mlon = mean(lon, na.rm = T))
 
 # Examine the data
@@ -190,10 +198,10 @@ coord %>%
   select(tag_id, mlat, mlon)
 
 
-# how many tags are scanned more than once? 89, most number of scans is 4, many of the 89 are 2
-# test <- coord %>% 
-#   group_by(tag_id) %>% 
-#   summarise(num_scans = n()) %>% 
+# how many tags are scanned more than once? once was 89, most number of scans is 4, many of the 89 are 2; now it is 0
+# test <- coord %>%
+#   group_by(tag_id) %>%
+#   summarise(num_scans = n()) %>%
 #   filter(num_scans > 1)
 # # get each tag down to one observation - this is just anem_id and lat long, no extra info here
 # out <- out %>%
@@ -201,9 +209,9 @@ coord %>%
 #   summarise(mlat = mean(lat, na.rm = TRUE),
 #     mlon = mean(lon, na.rm = T))
 
-readr::write_csv(coord, str_c("data/unscanned_pit_tags_for_QGIS_2018_", Sys.Date(), ".csv", sep = ""))
+readr::write_csv(coord, str_c("../Phils_GIS_R/data/Fish/unscanned_pit_tags_for_QGIS_2018_", Sys.Date(), ".csv", sep = ""))
 
-### MOVE THIS CSV TO THE PHILS_GIS_R DATA DIRECTORY ###
+
 
 
 
