@@ -49,7 +49,9 @@ anem <- anem %>%
     gps = as.character(gps))
 
 # convert to UTC
-anem <- mutate(anem, obs_time = with_tz(obs_time, tzone = "UTC"))
+anem <- anem %>% 
+  mutate(obs_time = with_tz(obs_time, tzone = "UTC"), 
+    id = 1:nrow(anem))
 
 # in order to use the **assign_gpx function**, need a table that contains an id, gps unit, and a date_time that have been converted to UTC time zone - the date_time column must be called "obs_time"
 # debugonce(assign_gpx_field)
@@ -72,17 +74,10 @@ anem <- anem %>%
 
 # Examine the data
 anem %>%
-  select(obs_time, anem_spp, fish_spp, lat, lon, anem_id)
+  select(obs_time, lat, lon, anem_id)
 
-# Write out for QGIS (has column headers)
-# add notes based on whether or not the anem has fish on it
-# fish <- anem %>%
-#   filter(!is.na(fish_spp) & fish_spp != "")
-# fish$notes <- paste(fish$anem_spp, fish$anem_id, "w/", fish$fish_spp, sep = " ")
-# fish <- select(fish, lat, lon, notes, obs_time, site, anem_id)
-# # what isn't in fish?
 anem <- anem %>%
-  select(lat, lon, obs_time, site, anem_id) ##ALLISON NOTE: added year hear b/c was needed in write_csv line below ## MRS - removed year because it doesn't exist in the table?
+  select(lat, lon, obs_time, anem_id) ##ALLISON NOTE: added year hear b/c was needed in write_csv line below ## MRS - removed year because it doesn't exist in the table?
 out <- anem
 # out <- rbind(fish,anem)
 out <- distinct(out)
