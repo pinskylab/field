@@ -5,19 +5,14 @@
 # Load relevant libraries
 library(dplyr)
 library(lubridate)
+library(readr)
+source("scripts/field_helpers.R")
 
-# # Old way of loading saved database files on Allison computer
-# # Load database files (for while in Philippines)
-# load(file = here("Data", "anem_db.RData"))
-# load(file = here("Data", "fish_db.RData"))
-# load(file = here("Data", "dives_db.RData"))
-# load(file = here("Data", "gps_db.RData"))
-# 
-# # Rename loaded files to make them consistent with other code
-# dives <- dives_db
-# anems <- anem_db
-# fish <- fish_db
-# gps <- gps_db
+# import data from database in the field (no network connection)
+
+# create rdata from db_backups 
+clown <- read_csv(file = "data/db_backups/clownfish.csv")
+save(clown, file = "data/clownfish_db.Rdata")
 
 # Load database files stored in fields repository
 anems <- read.csv("data/anemones.csv", stringsAsFactors = FALSE, na="NULL") %>%
