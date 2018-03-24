@@ -191,6 +191,7 @@ if (nrow(bad) > 0){
 (problem <- rbind(problem, bad))
 
 # are there anemones listed at a different site than they were in other years? Don't include new tags - in 2018 2938 was first tag ####
+google_dive <- dive
 
   # field use
 load("data/db_backups/anemones_db.Rdata")
@@ -202,6 +203,7 @@ load("data/db_backups/anemones_db.Rdata")
  load("data/db_backups/diveinfo_db.Rdata")
   dive_db <- dive %>%
     select(dive_table_id, site) 
+  rm(dive)
   
 anem_db <- left_join(anem_db, dive_db, by = "dive_table_id")
 anem_site <- anem_db %>%
@@ -215,12 +217,15 @@ anem_site <- anem_db %>%
     filter(!is.na(anem_id), anem_id != "-9999", anem_id < 2938) %>% 
     distinct() %>% 
     mutate(anem_id = as.character(anem_id))
+  dive <- google_dive
+  
   new_anem_site <- left_join(anem, dive, by = "dive_num") %>% 
     select(dive_num, anem_id, site) %>% 
-    mutate(anem_id = as.integer(anem_id))
+    mutate(anem_id = as.integer(anem_id)) %>% 
+    distinct()
   
   # compare the two tables # diff 
-  bad <- left_join(new_anem_site, anem_site, by = "anem_id") %>% 
+  bad <- left_join(new_anem_site, anem_site) %>% 
     filter(old_site != site | is.na(site)) #need to figure out how to get filter to keep nas, bad work-around at the moment
   
   # %>% 
@@ -244,7 +249,8 @@ anem_site <- anem_db %>%
   misplaced <- clown %>% 
     filter(is.na(anem_spp), 
       !is.na(depth) | !is.na(gps) |
-      !is.na(anem_dia) | !is.na(egg_height))
+      !is.na(anem_dia) | !is.na(egg_height)) %>% 
+    filter(!is.na(anem_id) & anem_spp != "EMPT")
   
   # someday when we want to separate multiple fish on one untagged anem to make it not look like multiple anems, can check if the time is the same for multiple fish (or is time the same for identical anems) - this won't work well because it will be hard to tell if it is more than one anem or one anem recorded several times.
   
