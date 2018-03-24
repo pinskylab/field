@@ -5,20 +5,19 @@ library(tidyverse)
 library(lubridate)
 library(stringr)
 source("scripts/field_helpers.R")
-source("scripts/readGPXGarmin.R")
 
 # ---------------------------------------------
 #   Read data and format
 # ---------------------------------------------
 
-get_from_google()
+# get_from_google()
 
-# # load data from saved if network connection is lost ####
-# # get list of files 
-# clown_files <- sort(list.files(path = "data/", pattern = "clown_201*"), decreasing = T)
-# dive_files <- sort(list.files(path = "data/", pattern = "dive_201*"), decreasing = T)
-# load(file = paste("data/", clown_files[1], sep = ""))
-# load(file = paste("data/", dive_files[1], sep = ""))
+# load data from saved if network connection is lost ####
+# get list of files
+clown_files <- sort(list.files(path = "data/", pattern = "clown_201*"), decreasing = T)
+dive_files <- sort(list.files(path = "data/", pattern = "dive_201*"), decreasing = T)
+load(file = paste("data/", clown_files[1], sep = ""))
+load(file = paste("data/", dive_files[1], sep = ""))
 
 anem <- clown %>% 
   filter(!is.na(anem_spp)) %>% # we only want anem_obs, not fish_obs 
@@ -53,9 +52,19 @@ anem <- anem %>%
 anem <- mutate(anem, obs_time = with_tz(obs_time, tzone = "UTC"))
 
 # in order to use the **assign_gpx function**, need a table that contains an id, gps unit, and a date_time that have been converted to UTC time zone - the date_time column must be called "obs_time"
+# debugonce(assign_gpx_field)
+coord_table <- assign_gpx_field(anem) 
 
-coord_table <- assign_gpx_field(anem)
+coord_table <- distinct(coord_table)
 
+anem <- left_join(anem, coord_table) %>% 
+  distinct()
+
+# how many anems have more than one obs?
+multi <- anem %>% 
+  group_by(anem_id) %>% 
+  summarise(count = n()) %>% 
+  filter(count > 1)
 
 # Sort the data
 anem <- anem %>%
