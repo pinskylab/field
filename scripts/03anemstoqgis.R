@@ -77,7 +77,11 @@ anem %>%
   select(obs_time, lat, lon, anem_id)
 
 anem <- anem %>%
+<<<<<<< HEAD
+  select(lat, lon, obs_time, site, anem_id) ##ALLISON NOTE: added year here b/c was needed in write_csv line below ## MRS - removed year because it doesn't exist in the table?
+=======
   select(lat, lon, obs_time, anem_id) ##ALLISON NOTE: added year hear b/c was needed in write_csv line below ## MRS - removed year because it doesn't exist in the table?
+>>>>>>> f99f4d46f510010e91f33a305f5043d51c2a0992
 out <- anem
 # out <- rbind(fish,anem)
 out <- distinct(out)

@@ -261,6 +261,9 @@ anem_site <- anem_db %>%
 pit <- from_scanner(pitfile) # should generate 4 parsing failures #AD note - only generated 3 parsing errors... but still produces 3 columns "scan", "date", "time"
 old_pit <- from_scanner(oldpitfile)
 
+#When ran 3/25/18, old_pit has a \ added to the end of each time - remove it below
+old_pit$time <- str_sub(old_pit$time, 1, str_length(old_pit$time)-1)
+
 pit <- rbind(pit, old_pit) #join scans from current pit scanner and first one together
 rm(old_pit)
 
