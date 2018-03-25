@@ -18,21 +18,15 @@ source("scripts/field_helpers.R")
 
 get_from_google()
 
-# # load data from saved if network connection is lost
-# # THIS HAS TO BE MANUALLY UPDATED WITH MOST CURRENT VERSION OF SAVED FILE  - COULD WRITE CODE TO FIND AND LOAD THE MOST CURRENT VERSION ####
-# load(file = "data/clown_2018-03-14 20:46:44.Rdata")
-# load(file = "data/dive_2018-03-14 20:46:44.Rdata")
+# # if network connection is not available, find the latest save in the data folder ####
+# # load data from saved if network connection is lost ####
+# # get list of files
+# clown_files <- sort(list.files(path = "data/google_sheet_backups/", pattern = "clown_201*"), decreasing = T)
+# dive_files <- sort(list.files(path = "data/google_sheet_backups/", pattern = "dive_201*"), decreasing = T)
+# load(file = paste("data/google_sheet_backups/", clown_files[1], sep = ""))
+# load(file = paste("data/google_sheet_backups/", dive_files[1], sep = ""))
 
 surv <- dive
-
-# # if the data is in csv - the csvs aren't working with this code - need to convert characters to datte time??
-# surv <- read.csv(file = "data/2018_clownfish_data_entry - diveinfo.csv", stringsAsFactors = F)
-# surv <- surv %>% 
-#   mutate(date = ymd(date), 
-#     start_time = hms(start_time))
-# 
-# clown <- read.csv(file = "data/2018_clownfish_data_entry - clownfish-3.csv", stringsAsFactors = F)
-
 names(surv) <- stringr::str_to_lower(names(surv))
 
 # Combine date and time to form a dttm column and set the time zone to PHT, Asia/Manila 
@@ -55,6 +49,7 @@ surv <- surv %>%
 
 # This change to UTC should also change the date if necessary ####
 
+gpx <- data.frame()
 # define the list of gps units
 gps <- name_gps()
 
@@ -65,8 +60,17 @@ for (l in 1:length(gps)){
   files <- list.files(path = paste("data/",gps[l], sep = ""), pattern = "*Track*")
   for(i in 1:length(files)){ # for each file
     
-    # debugonce(prep_gpx)
-    dat <- prep_gpx(gps, files) # parse the gpx into useable data
+    # parse the gpx into useable data
+    infile <- readGPXGarmin(paste("data/", gps[l], "/", files[i], sep="")) # list of 2 itmes, header and data
+    header <<- infile$header
+    dat <- infile$data
+    dat$time <- ymd_hms(dat$time)
+    instarttime <<-  dat$time[1] # start time for this GPX track
+    inendtime <<- dat$time[nrow(dat)] # end time for this GPX track
+    dat$elev <- 0 # change elevation to zero
+    dat$unit <- substr(gps[l],4,4)
+    
+    gpx <- rbind(gpx, dat)
     
     # which survey started after the gpx and ended before the gpx
     inds <- surv %>% 
