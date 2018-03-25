@@ -21,9 +21,9 @@ source("scripts/field_helpers.R")
 # save(anem, file = "data/anemones_db.Rdata")
 # save(dive, file = "data/diveinfo_db.Rdata")
 # save(pit, file = "data/pitscan_db.Rdata")
-load(file = "data/clownfish_db.Rdata")
-load(file = "data/anemones_db.Rdata")
-load(file = "data/diveinfo_db.Rdata")
+load(file = "data/db_backups/clownfish_db.Rdata") 
+load(file = "data/db_backups/anemones_db.Rdata")
+load(file = "data/db_backups/diveinfo_db.Rdata")
 
 # # import data from database in NJ ####
 # leyte <- read_db("Leyte")
@@ -95,7 +95,7 @@ recaps1ScanInfo <- allfish %>%
   select(tag_id, site)
 
 # double check these scans
-load("data/pitscan_db.Rdata")
+load("data/db_backups/pitscan_db.Rdata")
 # 818477 is only in pit scan db once, checking data sheet: this fish had a tag when it was scanned. - Needs a finclip
 # 373100 was part of Patrick's pilot study and needs a finclip
 # 373978 was also part of Patrick's pilot study and needs a finclip
@@ -115,7 +115,7 @@ samplefail <- allfish %>% filter(sample_id %in% sampfails & !is.na(tag_id)) #pul
 
 #add to list
 need_clips <- rbind(need_clips, (samplefail %>% select(tag_id, site)))
-rm(samplefails, samplefail)
+rm(sampfails, samplefail)
 
 # WAY 4 - other sample fails Michelle had mentioned previously - are they already in the list?
 tags_needclips <-c(985153000375914, 985153000404510, 986112100164794) #Palanas, Wangag, Magbangon
