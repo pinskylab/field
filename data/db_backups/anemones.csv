@@ -7111,7 +7111,8 @@ anem_table_id,dive_table_id,"obs_time","collector",depth_m,depth_ft,"anem_spp",a
 4162,172,"09:51:00","PHF",NULL,8,"ENQD",25,674,1066,1044,NULL,NULL,NULL,NULL,NULL,NULL
 6914,290,"11:27:00","MRS",3.1,NULL,"MADO",25,128,2206,1045,NULL,NULL,NULL,NULL,NULL,NULL
 8545,419,"10:01:47","KAC",2,NULL,"HECR",40,1048,2710,94,NULL,NULL,NULL,NULL,NULL,NULL
-8506,417,"11:12:57","KAC",2.6,NULL,"HECR",30,-9999,2695,95,NULL,NULL,"Y","2017-11-16","MRS","Changed old_anem_id from 100 to -9999 because 100 is in Sitio Baybayon and any of the nearby tags could have been mistaken for 100."
+8506,417,"11:12:57","KAC",2.6,NULL,"HECR",30,1036,2695,95,NULL,NULL,"Y","2017-03-26","MRS","Changed old_anem_id from -9999 to 1036 based on observation in 2018
+2017-06-11 - MRS Changed old_anem_id from 100 to -9999 because 100 is in Sitio Baybayon and any of the nearby tags could have been mistaken for 100."
 4225,171,"10:17:00","G_S",NULL,11,"HECR",33,207,1111,1046,NULL,"UNSURE OF OLD TAG NUMBER",NULL,NULL,NULL,NULL
 8370,393,"09:49:07","KAC",1,NULL,"HECR",25,376,2645,96,NULL,"1 APPE, 3cm",NULL,NULL,NULL,NULL
 9773,454,"10:13:00","MRS",NULL,NULL,NULL,NULL,NULL,2025,59,NULL,NULL,NULL,NULL,NULL,NULL
