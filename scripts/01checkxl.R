@@ -20,31 +20,6 @@ oldpitfile <- ("data/BioTerm_old.txt")
 
 problem <- data.frame()
 
-# if you haven't downloaded data from the db to be used in the field, do it now (Michelle did for 2018, get a copy from her if you need it)
-# setup
-# leyte <- read_db("Leyte")
-# anem_db <- leyte %>% 
-#   tbl("anemones") %>% 
-#   select(anem_table_id, dive_table_id, anem_id) %>% 
-#   filter(!is.na(anem_id), anem_id != "-9999") %>% 
-#   collect()
-# dive_db <- leyte %>% 
-#   tbl("diveinfo") %>% 
-#   select(dive_table_id, site) %>% 
-#   collect()
-# anem_db <- left_join(anem_db, dive_db, by = "dive_table_id")
-# anem_site <- anem_db %>% 
-#   select(anem_id, site) %>% 
-#   distinct()
-# save(anem_site, file="data/anem_site.Rdata")
-# fish_db <- leyte %>%
-#   tbl("clownfish") %>%
-#   select(fish_table_id, anem_table_id, recap, tag_id) %>%
-#   filter(!is.na(tag_id)) %>%
-#   collect()
-# save(fish_db, file = "data/fish_db.Rdata")
-
-
 # ---------------------------------------------
 #   adjust formatting ####
 # ---------------------------------------------
