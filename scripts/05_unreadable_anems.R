@@ -21,6 +21,8 @@ unreadable <- clown %>%
   mutate(gps = as.integer(ifelse(is.na(gps), 4, gps)))
 # rm(clown)
 
+if (nrow(unreadable) > 0){
+  
 # add dive info
 dive <- dive %>% 
   select(dive_num, gps, date)
@@ -57,3 +59,6 @@ anem <- left_join(anem, coord)
 write_csv(anem, str_c("data/unreadable_anems", Sys.Date(), ".csv", sep = ""))
 
 ### MOVE THIS CSV TO THE PHILS_GIS_R DATA DIRECTORY ###
+}else{
+  print("all anems are defined")
+}
