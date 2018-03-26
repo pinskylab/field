@@ -9,12 +9,11 @@ source("scripts/field_helpers.R")
 
 get_from_google()
 
-# # load data from saved if network connection is lost ####
-# # get list of files
-# clown_files <- sort(list.files(path = "data/google_sheet_backups/", pattern = "clown_201*"), decreasing = T)
-# dive_files <- sort(list.files(path = "data/google_sheet_backups/", pattern = "dive_201*"), decreasing = T)
-# load(file = paste("data/google_sheet_backups/", clown_files[1], sep = ""))
-# load(file = paste("data/google_sheet_backups/", dive_files[1], sep = ""))
+# # if no network
+# get_data_no_net()
+# load(clown_filename)
+# load(dive_filename)
+
 
 # fish observation info from anem survey
 fish <- clown

@@ -539,3 +539,21 @@ assign_gpx_field <- function(id_table){
       lon = mlon)
   return(id_table)
 }
+
+# get_data_no_net ####
+#' get the data when no network is present
+#' @export
+#' @name get_data_no_net
+#' @author Michelle Stuart
+#' @examples 
+#' get_data_no_net()
+
+get_data_no_net <- function(){
+  # load data from saved if network connection is lost ####
+  # get list of files
+  clown_files <- sort(list.files(path = "data/google_sheet_backups/", pattern = "clown_201*"), decreasing = T)
+  dive_files <- sort(list.files(path = "data/google_sheet_backups/", pattern = "dive_201*"), decreasing = T)
+  clown_filename <<- paste("data/google_sheet_backups/", clown_files[1], sep = "")
+  dive_filename <<- paste("data/google_sheet_backups/", dive_files[1], sep = "")
+  
+}
