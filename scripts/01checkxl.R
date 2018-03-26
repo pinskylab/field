@@ -331,7 +331,5 @@ problem
 
 # should be 0 obs ####
 
-
-# are there any anemones that lack a description?
 # fish anems - vs anem obs
 
