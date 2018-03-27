@@ -281,6 +281,22 @@ anti_join(pit, tag_ids, by = c("scan" = "tag_id"))
 problem
 
 
+
+
+# testing ####
+# # an anemone came back as being listed in both Caridad and Hicgop South. This anemone is definitely in Hicgop, looking into database to see when it was ever recorded in Caridad.
+# load("data/db_backups/anemones_db.Rdata")
+# weird <- anem %>% 
+#   filter(anem_id == 305)
+# weird$corr_message
+# 
+# # the correction message says changed anem_id from 15 to NULL but the anem_id is not NULL, it is 305.  Very weird.  Let's get the info to go back to the data sheet - ok, changed anem_obs, not anem_id.  Fixed in db
+# 
+# load("data/db_backups/diveinfo_db.Rdata")
+# dive <- dive %>% 
+#   filter(dive_table_id %in% weird$dive_table_id)
+
+
 # # do we have any tags that are scanned as Y and only appear once - compare to db? - # Doesn't seem to be working as of 3/15/18; pulls out 986112100172598 and 986112100172301, both of which were scanned in 2017 when connect directly to database and check...
 # load("data/fish_db.Rdata")
 # 
@@ -300,4 +316,3 @@ problem
 # should be 0 obs ####
 
 # fish anems - vs anem obs
-
