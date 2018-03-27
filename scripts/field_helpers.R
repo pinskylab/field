@@ -1,5 +1,6 @@
 # helper scripts for field work
 library(dplyr)
+library(lubridate)
 # read_db ####
 #' views all of the fish recaptured at a given site
 #' @export
@@ -470,7 +471,7 @@ get_from_google <- function(){
 #' @examples 
 #' result <- assign_gpx_field(anem_table)
 assign_gpx_field <- function(id_table){
-  library(lubridate)
+  
   id_table <- id_table %>% 
     mutate(month = month(obs_time), 
       day = day(obs_time), 
@@ -532,7 +533,8 @@ assign_gpx_field <- function(id_table){
       mlon = mean(lon, na.rm = T))
   
   # drop all of the unneccessary columns from anem and join with the coord
-  id_table <- select(id_table, contains("id"), gps, dive_num, obs_time)
+  id_table <- id_table %>% 
+    select(gps, dive_num, obs_time, ends_with("id"))
   
   id_table <- left_join(coord, id_table, by = "id") %>% 
     rename(lat = mlat, 
