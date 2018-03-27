@@ -3726,7 +3726,7 @@ anem_table_id,dive_table_id,"obs_time","collector",depth_m,depth_ft,"anem_spp",a
 4796,183,"09:26:10","G_S",NULL,7,"HECR",28,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL
 2367,91,"08:40:00","MRS",NULL,2,"HECR",30,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL
 295,13,"11:58:00","MLP",4.8,NULL,"ENQD",15,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL
-6789,285,"16:22:00","MLP",NULL,NULL,"HECR",25,NULL,-9999,NULL,NULL,"Anem ID zip tie worn away, bottle nearby, size of YP guessed, anem is brown","Y","2018-01-12","MRS","changed anem_id from NULL to -9999 because there was an unreadable anemone tag on the anemone."
+6789,285,"16:22:00","MLP",NULL,NULL,"HECR",25,NULL,1284,NULL,NULL,"Anem ID zip tie worn away, bottle nearby, size of YP guessed, anem is brown","Y","2018-01-12","MRS","changed anem_id from -9999 to 1284 because there was an unreadable anemone tag on the anemone but the location suggests it was 1284"
 4736,180,"14:55:50","MRS",NULL,5,"HECR",25,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL
 4729,180,"14:45:21","MRS",NULL,10,"HECR",35,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL
 591,22,"11:44:00","MLP",2.5,NULL,"HECR",15,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL
@@ -3741,6 +3741,7 @@ anem_table_id,dive_table_id,"obs_time","collector",depth_m,depth_ft,"anem_spp",a
 937,40,"11:09:20","MLP",NULL,12,"HECR",40,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL
 3758,161,"11:51:30","MLP",NULL,7,"HECR",30,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL
 4568,174,"15:12:43","MRS",NULL,4,"HECR",25,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL
+4706,180,"14:00:00","MRS",NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,"JAH (GPS 5) IS AT THE WESTERN EDGE…OR IS SHE?",NULL,NULL,NULL,NULL
 4142,170,"09:43:36","MRS",NULL,5,"HECR",30,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL
 2366,91,"08:39:00","MRS",NULL,1,"HECR",60,NULL,NULL,NULL,NULL,"BLACK LION FISH",NULL,NULL,NULL,NULL
 6787,285,"16:13:00","MLP",NULL,NULL,"????",NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL
@@ -6784,7 +6785,7 @@ anem_table_id,dive_table_id,"obs_time","collector",depth_m,depth_ft,"anem_spp",a
 8750,437,"11:53:52","KAC",1.8,NULL,"HECR",15,410,2804,992,NULL,NULL,NULL,NULL,NULL,NULL
 8748,437,"11:48:32","KAC",1.7,NULL,"HECR",50,819,2808,5,NULL,NULL,NULL,NULL,NULL,NULL
 8744,437,"11:28:40","KAC",1.3,NULL,"HECR",25,817,2896,6,NULL,NULL,NULL,NULL,NULL,NULL
-8736,434,"15:42:38","KAC",1,NULL,"HECR",30,-9999,2802,1079,NULL,"Data sheet says 08811 which is not a tag number that we used - 881 is in Palanas","Y","2018-01-12","MRS","Changed old_anem_id from 881 to -9999 (unreadable) beause anem_id 881 is in Palanas and anem tag 811 was never recorded on a data sheet.  Changed anem_obs from 7 to 1079 (the next available number) because this anemone is no longer tied to anem_id 881 but is tied to other observances of anem_id 2802."
+8736,434,"15:42:38","KAC",1,NULL,"HECR",30,813,2802,1079,NULL,"Data sheet says 08811 which is not a tag number that we used - 881 is in Palanas - changed value to 813","Y","2018-01-12","MRS","Changed old_anem_id from 881 to 813 based on location beause anem_id 881 is in Palanas and anem tag 811 was never recorded on a data sheet.  Changed anem_obs from 7 to 1079 (the next available number) because this anemone is no longer tied to anem_id 881 but is tied to other observances of anem_id 2802."
 6926,290,"12:44:00","MRS",3.5,NULL,"MADO",10,969,2208,8,NULL,NULL,NULL,NULL,NULL,NULL
 6925,290,"12:40:00","MRS",3.5,NULL,"HECR",25,727,2207,9,NULL,"Malin estimated 2 small fish sizes",NULL,NULL,NULL,NULL
 8728,434,"14:56:13","KAC",2.1,NULL,"HECR",30,NULL,2178,45,NULL,NULL,NULL,NULL,NULL,NULL
@@ -7423,6 +7424,7 @@ anem_table_id,dive_table_id,"obs_time","collector",depth_m,depth_ft,"anem_spp",a
 2232,89,"10:04:00","MRS",NULL,6,"HECR",20,NULL,232,311,NULL,NULL,NULL,NULL,NULL,NULL
 6233,243,"10:41:52","MRS",NULL,4,"HECR",30,NULL,1397,312,NULL,"AGGRESSIVE FISH",NULL,NULL,NULL,NULL
 6740,277,"10:07:00","MRS",4.8,NULL,"HECR",20,NULL,535,313,NULL,NULL,NULL,NULL,NULL,NULL
+8453,409,"10:06:14","KAC",4.6,NULL,"HECR",25,NULL,2674,314,NULL,"1 APPE 4, EGGS, 1 ESCAPEE, OR SMALLER OF 2674…","Y","2017-10-06","MRS","Changed old_anem_id from unreadable to -9999 based on lab protocol"
 9457,418,"09:47:00","MRS",NULL,NULL,NULL,NULL,NULL,2705,315,NULL,NULL,NULL,NULL,NULL,NULL
 6657,271,"15:21:00","MRS",2.1,NULL,"HECR",35,NULL,1230,316,NULL,NULL,NULL,NULL,NULL,NULL
 1566,59,"12:15:00","MLP",NULL,6,"HECR",40,NULL,344,317,NULL,"Reached previous surveys in Wangag North at 12:14. Stopped surveying HECRs to avoid double-counting.",NULL,NULL,NULL,NULL
@@ -8271,6 +8273,7 @@ anem_table_id,dive_table_id,"obs_time","collector",depth_m,depth_ft,"anem_spp",a
 3269,154,"10:27:00","G_S",NULL,12,"HEMA",6,NULL,941,483,NULL,NULL,NULL,NULL,NULL,NULL
 6548,261,"11:48:00","MRS",2.5,NULL,"HECR",15,NULL,1298,740,NULL,NULL,NULL,NULL,NULL,NULL
 4487,175,"14:09:18","G_S",NULL,6,"HECR",19,NULL,1120,741,NULL,NULL,NULL,NULL,NULL,NULL
+8986,461,"10:30:52","KAC",2.6,NULL,"HECR",NULL,NULL,2655,473,NULL,"POSSIBLY 5 FISH, THE EXTRA WOULD BE 8…GERRY THINKS 4 FISH, KATRINA THINKS 5",NULL,NULL,NULL,NULL
 3267,153,"10:25:36","JAH",NULL,12,"HECR",30,NULL,423,646,NULL,NULL,NULL,NULL,NULL,NULL
 1631,61,"16:27:30","MLP",NULL,5,"HECR",15,NULL,365,742,NULL,"Changed col from WP to W to simplify tail color coding (MRS 7/17/17)",NULL,NULL,NULL,NULL
 1125,41,"14:30:00","MLP",NULL,11,"HECR",40,NULL,178,160,NULL,NULL,NULL,NULL,NULL,NULL
