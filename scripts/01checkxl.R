@@ -217,9 +217,18 @@ anem_site <- anem_db %>%
   misplaced <- clown %>% 
     filter(is.na(anem_spp), 
       !is.na(depth) | !is.na(gps) |
-      !is.na(anem_dia) | !is.na(egg_height)) %>% 
+        !is.na(anem_dia) | !is.na(egg_height)) %>% 
     filter(!is.na(anem_id) & anem_spp != "EMPT")
   
+  
+# is the same old_anem_id used for multiple anems?
+  
+double <- clown %>% 
+  group_by(old_anem_id) %>% 
+  summarise(count = n()) %>% 
+  filter(count > 1)
+  
+    
   # someday when we want to separate multiple fish on one untagged anem to make it not look like multiple anems, can check if the time is the same for multiple fish (or is time the same for identical anems) - this won't work well because it will be hard to tell if it is more than one anem or one anem recorded several times.
   
   
