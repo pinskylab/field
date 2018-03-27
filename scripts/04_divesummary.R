@@ -168,7 +168,7 @@ dive_count <- dive %>%
 sitetot <- left_join(sitetot, dive_count, by = "site")
 
 sitetot <- sitetot %>% 
-  select(site, number_dives, observed, captured, finclip, recap, clipped_recaps, same_season_recap) %>%
+  select(site, number_dives, observed, captured, finclip, recap) %>%
   distinct()
 
 # are any captured more than observed?
