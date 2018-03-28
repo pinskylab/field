@@ -1,4 +1,5 @@
 # connect current field anems to anem obs and map one dot for each anemone
+library(stringr)
 source("scripts/field_helpers.R")
 
 # get data ####
@@ -159,103 +160,208 @@ for (i in 1:nrow(olds)){
 all_anem <- anti_join(all_anem, olds, by = "anem_id")
 all_anem <- rbind(all_anem, olds)
 
-rm(all_ids, all_old_ids, field_anem, anem_db, clown, dive, have_obs, have_old, have_old_obs, lack_obs, many)
+rm(all_ids, all_old_ids, field_anem, anem_db, clown, dive, have_obs, have_old, have_old_obs, lack_obs, many, multi_visit, new, new_obs, olds, once, somany, x)
 
-# # TEST make sure each anem_id is only at one site ####
-# test <- all_anem %>% 
-#   select(anem_id, dive_table_id, anem_table_id)
-# 
-# test <- anem_site(test)
-# 
-# test <- test %>%
-#   distinct(anem_id, site) %>% 
-#   group_by(anem_id) %>% 
-#   summarize(num_sites = n()) %>% 
-#   filter(anem_id != "-9999" & anem_id != "", num_sites > 1)
-# 
-# # repeat for anem_obs
-# test <- anem %>% 
-#   select(anem_id, anem_obs, dive_table_id, anem_table_id)
-# 
-# test <- anem_site(test)
-# 
-# test2 <- test %>%
-#   filter(!is.na(anem_obs)) %>% 
-#   distinct(anem_obs, site) %>% 
-#   group_by(anem_obs) %>% 
-#   summarize(num_sites = n()) %>% 
-#   filter(num_sites > 1)
-# 
-# test3 <- test %>% # 19 obs come up with more than one site
-#   filter(anem_obs %in% test2$anem_obs) %>% 
-#   arrange(anem_obs)
-# test4 <- left_join(test3, anem, by = c("anem_table_id", "dive_table_id", "anem_obs", "anem_id"))
-# temp <- anem_date(test4)
-# fix <- left_join(test4, temp, by = "dive_table_id") %>% 
-#   select(anem_obs, anem_id, old_anem_id, site, date, everything())
-# 
-# 
-# 
-# # 
-# leyte <- write_db("Leyte")
-# dbWriteTable(leyte, "anemones", anem, row.names = F, overwrite = T)
-# dbDisconnect(leyte)
+##############################################################################
+# assign gps locations to these anems to map each anem only once ####
 
-#####################################################################
-# I did this with the for loop above but this is also a good way.
-# # find old_anem_ids that are not in the multi table as original anem_ids
-# have_match <- multi %>% 
-#   filter(old_anem_id %in% anem_id)
-# 
-# # remove all old_anem_ids that do not have a match in the id column and create an id column for them
-# need_match <- anti_join(multi, have_match) %>% 
-#   select(old_anem_id, anem_obs) %>% 
-#   mutate(anem_id = old_anem_id)
+# split out the anems into past and present field seasons, and visited and not visited - need to grab db gpx and also current gpx files
 
-# # rejoin to multi
-# multi <- rbind(multi, need_match) %>% 
-#   filter(anem_id != "-9999")
+# reduce all_anem to anem_id and anem_obs
+anemobs <- all_anem %>% 
+  select(anem_id, anem_obs) %>% 
+  distinct()
 
-# # to incorporate this into the anem table, no longer need old_anem_id column because it is represented in the anem_id column and matched to an anem_obs
-# multi <- multi %>% 
-#   select(-old_anem_id) %>% 
-#   distinct()
-# 
-# 
-# # remove rows to be changed from original db
-# old <- anti_join(old, anem)
-# 
-# # remove anem_obs from the anem table because nothing has ever been assigned an anem obs before, this won't work in the future - 
-# anem <- select(anem, -anem_obs)
-# 
-# # join the info
-# anem <- left_join(anem, multi, by = "anem_id")
-# 
-# # join to odb
-# anem <- rbind(old, anem)
-# 
-# # # too many rows, which row numbers are duplicated?
-# # prob <- anem %>% 
-# #   group_by(anem_table_id) %>% 
-# #   summarise(count = n()) %>% 
-# #   filter(count > 1) 
-# # 
-# # test <- filter(anem, anem_table_id == 860)
-# 
-# 
-# library(RMySQL)
-# 
-# # leyte <- dbConnect(MySQL(), "Leyte", default.file = path.expand("~/myconfig.cnf"), port = 3306, create = F, host = NULL, user = NULL, password = NULL)
-# # 
-# # dbWriteTable(leyte, "anemones", anem, row.names = F, overwrite = T)
-# # # 
-# # # 
-# # dbDisconnect(leyte)
-# # rm(leyte)
+# get past anems
+load("data/db_backups/anemones_db.Rdata")
+load("data/db_backups/diveinfo_db.Rdata")
+load("data/db_backups/gpx_db.Rdata")
+
+past_anem <- anem %>% 
+  filter(!is.na(anem_id)) %>% 
+  select(anem_id, old_anem_id, anem_obs, obs_time, dive_table_id, anem_table_id)
+rm(anem)
+past_dive <- dive %>%
+  filter(dive_table_id %in% past_anem$dive_table_id) %>% 
+  select(dive_table_id, date, gps)
+rm(dive)
+past_anem_dive <- left_join(past_anem, past_dive, by = "dive_table_id") %>% 
+  mutate(obs_time = force_tz(ymd_hms(str_c(date, obs_time, sep = " ")),  tzone = "Asia/Manila"))
+rm(past_anem, past_dive)
+
+#### NEED TO CREATE AN assign_gpx_db SCRIPT ####
+
+# convert time zone to UTC
+past_anem_dive <- past_anem_dive %>% 
+  mutate(obs_time = with_tz(obs_time, tzone = "UTC"), 
+    year = year(obs_time), 
+    month = month(obs_time), 
+    day = day(obs_time), 
+    hour = hour(obs_time), 
+    min = minute(obs_time)
+    )
+
+past_gpx <- gpx %>% 
+  mutate(year = year(time), 
+    month = month(time), 
+    day = day(time), 
+    hour = hour(time), 
+    min = minute(time)
+    ) %>% 
+  group_by(year, month, day, hour, min, unit) %>% 
+  summarise(lat = mean(lat), 
+    lon = mean(lon)) %>% 
+  rename(gps = unit)
+
+past_anem_dive_gpx <- left_join(past_anem_dive, past_gpx, by = c("gps", "year", "month", "day", "hour", "min")) %>% 
+  select(-anem_obs)
+
+# make sure all anem_ids have updated anem_obs
+past_for_qgis <- left_join(past_anem_dive_gpx, anemobs, by = "anem_id") %>% 
+  select(anem_id, anem_obs, anem_table_id, lat, lon) %>% 
+  mutate(note = as.character(anem_id))
 
 
 
+# separate the anems that have been observed more than once
+has_obs <- past_for_qgis %>% 
+  filter(!is.na(anem_obs)) %>% 
+  distinct() 
+
+obs <- has_obs %>% 
+  select(anem_obs) %>% 
+  distinct()
+
+for (i in 1:nrow(obs)) {
+  x <- has_obs %>% 
+    filter(anem_obs == obs$anem_obs[i]) %>% 
+    select(anem_id) %>% 
+    distinct()
+  has_obs <- has_obs %>% 
+    mutate(note = ifelse(anem_obs == obs$anem_obs[i], as.character(list(x$anem_id)), note))
+}
+
+# update past_for_qgis
+past_for_qgis <- anti_join(past_for_qgis, has_obs, by = "anem_table_id")
+
+past_for_qgis <- rbind(past_for_qgis, has_obs) %>% 
+  distinct()
+
+# find a mean lat lon for each anem
+means <- past_for_qgis %>% 
+  group_by(note) %>% 
+  summarise(lat = mean(lat), 
+    lon = mean(lon))
+
+past_for_qgis <- past_for_qgis %>% 
+  select(-anem_table_id, -lat, -lon)
+
+past_for_qgis <- left_join(past_for_qgis, means, by = "note")
+
+##############################################
+
+# get current anems ####
+
+# if network
+# get_from_google()
+
+# # if no network
+get_data_no_net()
+load(clown_filename)
+load(dive_filename)
+
+current_anem <- clown %>% 
+  filter(!is.na(obs_time),  obs_time != "NA", !is.na(anem_spp), !is.na(anem_id)) %>% 
+  select(anem_id, old_anem_id, obs_time, dive_num, gps) %>% 
+  mutate(gps = ifelse(is.na(gps), 4, gps))
+rm(clown)
+
+curr_dive <- dive %>%
+  filter(dive_num %in% current_anem$dive_num) %>% 
+  select(dive_num, date, gps)
+rm(dive)
+
+curr_anem_dive <- left_join(current_anem, curr_dive, by = c("dive_num", "gps")) %>% 
+  mutate(obs_time = force_tz(ymd_hms(str_c(date, obs_time, sep = " ")),  tzone = "Asia/Manila"))
+curr_anem_dive <- curr_anem_dive %>% 
+    mutate(id = 1:nrow(curr_anem_dive), 
+    gps = as.character(gps))
+rm(current_anem, curr_dive)
+
+# convert time zone to UTC
+curr_anem_dive <- curr_anem_dive %>% 
+  mutate(obs_time = with_tz(obs_time, tzone = "UTC"))
 
 
-# include untagged anems as anem_spp
+curr_anem_dive_gpx <- assign_gpx_field(curr_anem_dive)
+
+curr_for_qgis <- curr_anem_dive_gpx %>% 
+  distinct() 
+
+# make sure all anems have updated anem_obs
+curr_for_qgis <- left_join(curr_for_qgis, anemobs, by = "anem_id") %>% 
+  select(anem_id, anem_obs, id, lat, lon) %>% 
+  mutate(note = as.character(anem_id))
+
+# separate the anems that have been observed more than once
+has_obs <- curr_for_qgis %>% 
+  filter(!is.na(anem_obs)) %>% 
+  distinct() 
+
+obs <- has_obs %>% 
+  select(anem_obs) %>% 
+  distinct()
+
+for (i in 1:nrow(obs)) {
+  x <- has_obs %>% 
+    filter(anem_obs == obs$anem_obs[i]) %>% 
+    select(anem_id) %>% 
+    distinct()
+  has_obs <- has_obs %>% 
+    mutate(note = ifelse(anem_obs == obs$anem_obs[i], as.character(list(x$anem_id)), note))
+}
+
+# update past_for_qgis
+curr_for_qgis <- anti_join(curr_for_qgis, has_obs, by = "id")
+
+curr_for_qgis <- rbind(curr_for_qgis, has_obs) %>% 
+  distinct()
+
+# find a mean lat lon for each anem
+means <- curr_for_qgis %>% 
+  group_by(note) %>% 
+  summarise(lat = mean(lat), 
+    lon = mean(lon))
+
+curr_for_qgis <- curr_for_qgis %>% 
+  select(-id, -lat, -lon)
+
+curr_for_qgis <- left_join(curr_for_qgis, means, by = "note") %>% 
+  mutate(era = "current")
+
+# remove anems seen currently from the past
+past_for_qgis <- anti_join(past_for_qgis, curr_for_qgis, by = "anem_id")
+
+# repeat with anem obs separately to get all of the repeats
+past_for_qgis <- anti_join (past_for_qgis, curr_for_qgis, by = "anem_obs") %>% 
+  mutate(era = "past")
+
+# make one big table
+for_qgis <- rbind(curr_for_qgis, past_for_qgis)
+
+# mark out all of the EMPT anems
+empt <- all_anem %>% 
+  select(anem_spp, anem_id, anem_obs) %>% 
+  filter(anem_spp == "EMPT")
+
+for_qgis <- for_qgis %>% 
+  mutate(era = ifelse(anem_id %in% empt$anem_id | anem_obs %in% empt$anem_obs, "EMPT", era)) %>% 
+  select(note, lat, lon, era) %>% 
+  distinct()
+
+  
+write.csv(filter(for_qgis, era == "past"), file = "../Phils_GIS_R/data/Anems/past_anems.csv")
+write.csv(filter(for_qgis, era == "current"), file = "../Phils_GIS_R/data/Anems/current_anems.csv")
+write.csv(filter(for_qgis, era == "EMPT"), file = "../Phils_GIS_R/data/Anems/empty_anems.csv")
+
 

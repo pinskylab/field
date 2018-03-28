@@ -452,7 +452,8 @@ get_from_google <- function(){
   # gs_auth(new_user = TRUE) # run this if having authorization problems
   mykey <- '1symhfmpQYH8k9dAvp8yV_j_wCTpIT8gO9No4s2OIQXo' # access the file
   entry <-gs_key(mykey)
-  clown <<-gs_read(entry, ws='clownfish')
+  clown <<-gs_read(entry, ws='clownfish') %>% 
+    mutate(obs_time = as.character(obs_time))
   dive <<- gs_read(entry, ws="diveinfo")
   
   # save data in case network connection is lost
