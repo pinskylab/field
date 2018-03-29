@@ -5,12 +5,12 @@ source("scripts/field_helpers.R")
 # get data ####
 
 # if network
-# get_from_google()
+get_from_google()
 
 # if no network
-get_data_no_net()
-load(clown_filename)
-load(dive_filename)
+# get_data_no_net()
+# load(clown_filename)
+# load(dive_filename)
 
 # which field observations are anems?
 field_anem <- clown %>% 
