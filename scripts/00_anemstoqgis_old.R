@@ -20,7 +20,7 @@ get_from_google()
 
 anem <- clown %>% 
   filter(!is.na(anem_spp)) %>% # we only want anem_obs, not fish_obs 
-  select(dive_num, obs_time, gps, anem_id)
+  select(dive_num, obs_time, gps, anem_id, anem_spp)
 # if gps was not specified on the line, use Michelle's gps because she was the anem obs person on the early dives.
 anem <- anem %>% 
   mutate(gps = ifelse(is.na(gps), 4, gps)) %>% 
@@ -42,19 +42,11 @@ no_gps <- anem %>%
   filter(is.na(obs_time))
 anem <- anti_join(anem, no_gps)
 
-# combine the date_time and assign the Philippines time zone
-anem <- anem %>%
-  mutate(obs_time = force_tz(ymd_hms(str_c(date, obs_time, sep = " ")), tzone = "Asia/Manila"), 
-    gps = as.character(gps))
-
-# convert to UTC
-anem <- anem %>% 
-  mutate(obs_time = with_tz(obs_time, tzone = "UTC"), 
-    id = 1:nrow(anem))
-
 # in order to use the **assign_gpx function**, need a table that contains an id, gps unit, and a date_time that have been converted to UTC time zone - the date_time column must be called "obs_time"
 # debugonce(assign_gpx_field)
 coord_table <- assign_gpx_field(anem) 
+
+### WAIT ###
 
 coord_table <- distinct(coord_table)
 
@@ -86,5 +78,5 @@ out <- distinct(out)
 #     mlon = mean(lon, na.rm = T))
 
 
-write_csv(out, str_c("../Phils_GIS_R/data/Anems/GPSSurvey_anemlatlon_forQGIS_2018_", Sys.Date(), ".csv", sep = ""))
+# write_csv(out, str_c("../Phils_GIS_R/data/Anems/GPSSurvey_anemlatlon_forQGIS_2018_", Sys.Date(), ".csv", sep = ""))
 
