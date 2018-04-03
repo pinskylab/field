@@ -269,7 +269,7 @@ clown <- clown %>%
     
     
 
-tag_ids <- clown %>% select(contains("tag")) %>% filter(!is.na(tag_id))
+tag_ids <- clown %>% select(tag_id) %>% filter(!is.na(tag_id))
 
 # ---------------------------------------------
 #   compare scans to datasheets
