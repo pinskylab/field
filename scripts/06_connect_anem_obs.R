@@ -9,13 +9,13 @@ past_anem <- assign_db_gpx_field()
 
 # get current anems from google and assign lat lons
 
-# # if network
-# get_from_google()
+# if network
+get_from_google()
 
-# if no network
-get_data_no_net()
-load(clown_filename)
-load(dive_filename)
+# # if no network
+# get_data_no_net()
+# load(clown_filename)
+# load(dive_filename)
 
 # which field observations are anems with a tag?
 field_anem <- clown %>% 
@@ -141,6 +141,29 @@ all_anem <- rbind(all_anem, anemObs)
 empt <- all_anem %>% 
   filter(anem_spp == "EMPT")
 
-write.csv(filter(all_anem, era == "past"), file = "../Phils_GIS_R/data/Anems/past_anems.csv")
-write.csv(filter(all_anem, era == "current"), file = "../Phils_GIS_R/data/Anems/current_anems.csv")
+# make a list of present anems
+present <- all_anem %>% 
+  filter(era == "present") %>% 
+  select(anem_id) %>% 
+  distinct()
+
+past <- all_anem %>% 
+  filter(!anem_id %in% present$anem_id, 
+    !anem_id %in% empt$anem_id) %>% 
+  select(-anem_spp, -old_anem_id) %>% 
+  distinct()
+  
+current <- all_anem %>% 
+  filter(anem_id %in% present$anem_id, 
+    !anem_id %in% empt$anem_id) %>% 
+  select(-anem_spp, -old_anem_id, -era) %>% 
+  distinct()
+
+
+
+
+
+
+write.csv(past, file = "../Phils_GIS_R/data/Anems/past_anems.csv")
+write.csv(current, file = "../Phils_GIS_R/data/Anems/current_anems.csv")
 write.csv(empt, file = "../Phils_GIS_R/data/Anems/empty_anems.csv")
