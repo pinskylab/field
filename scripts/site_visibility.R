@@ -121,6 +121,7 @@ dives_annualAvg <- dives_annualAvg %>%
 pdf(file = "plots/Albuera_AvgVis.pdf")
 ggplot(data = (dives_Avg %>% filter(site %in% Albuera_sites)), aes(x=year, y=avg_vis, color=site, shape=site)) +
   geom_point(size=5.0, position=position_dodge(width=0.1)) +
+  geom_line() +
   ggtitle('Mean visibility through time at Albuera sites') +
   labs(x='year', y='average vis (m)') +
   scale_x_continuous(breaks=c(2012,2013,2014,2015,2016,2017)) +
