@@ -281,6 +281,8 @@ clown %>%
   filter(tag_id %in% spreadsheet$tag_id) %>% 
   select(dive_num, obs_time, tag_id)
 
+# if there are rows in spreadsheet, view pit and compare
+
 
 # What tags are in the scanner that are not in spreadsheet (type-os) - should return 0 rows
 anti_join(pit, tag_ids, by = c("scan" = "tag_id"))  
