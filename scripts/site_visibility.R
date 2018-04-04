@@ -124,7 +124,7 @@ ggplot(data = (dives_Avg %>% filter(site %in% Albuera_sites)), aes(x=year, y=avg
   geom_line() +
   ggtitle('Mean visibility through time at Albuera sites') +
   labs(x='year', y='average vis (m)') +
-  scale_x_continuous(breaks=c(2012,2013,2014,2015,2016,2017)) +
+  scale_x_continuous(breaks=c(2012,2013,2014,2015,2016,2017,2018)) +
   theme_bw()
 dev.off()
 
@@ -134,7 +134,7 @@ ggplot(data = dives_Avg, aes(x=year, y=avg_vis, color=site)) +
   geom_point(size=4.0, position=position_dodge(width=0.1)) +
   ggtitle('Mean visibility through time at all sites') +
   labs(x='year', y='average vis (m)') +
-  scale_x_continuous(breaks=c(2012,2013,2014,2015,2016,2017)) +
+  scale_x_continuous(breaks=c(2012,2013,2014,2015,2016,2017,2018)) +
   theme_bw()
 dev.off()
 
@@ -144,7 +144,7 @@ ggplot(data = (dives_annualAvg %>% filter(site %in% Albuera_sites)), aes(x=year,
   geom_pointrange(aes(ymin=min_vis, ymax=max_vis), size=1.0, position=position_dodge(width=0.3)) +
   ggtitle('Visibility through time at Albuera sites (mean with min-max range)') +
   labs(x='year', y='average vis (m) with min-max range') +
-  scale_x_continuous(breaks=c(2012,2013,2014,2015,2016,2017)) +
+  scale_x_continuous(breaks=c(2012,2013,2014,2015,2016,2017,2018)) +
   scale_y_continuous(limits = c(0,16)) +
   theme_bw()
 dev.off()
