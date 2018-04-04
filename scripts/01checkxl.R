@@ -7,17 +7,10 @@ source("scripts/field_helpers.R")
 
 get_from_google()
 
-# # if network connection is not available, find the latest save in the data folder ####
-# # load data from saved if network connection is lost ####
-# # get list of files
-# clown_files <- sort(list.files(path = "data/google_sheet_backups/", pattern = "clown_201*"), decreasing = T)
-# dive_files <- sort(list.files(path = "data/google_sheet_backups/", pattern = "dive_201*"), decreasing = T)
-# load(file = paste("data/google_sheet_backups/", clown_files[1], sep = ""))
-# load(file = paste("data/google_sheet_backups/", dive_files[1], sep = ""))
-
-# # if data is via csv
-# clown <- read.csv(stringsAsFactors = F, file = "data/2018_clownfish_data_entry - clownfish.csv")
-# dive <- read.csv(stringsAsFactors = F, file = "data/2018_clownfish_data_entry - diveinfo.csv")
+# # if no network
+# get_data_no_net()
+# load(clown_filename)
+# load(dive_filename)
 
 # include pit tag scanner output
 pitfile <- ("data/BioTerm.txt")
@@ -26,31 +19,6 @@ oldpitfile <- ("data/BioTerm_old.txt")
  
 
 problem <- data.frame()
-
-# if you haven't downloaded data from the db to be used in the field, do it now (Michelle did for 2018, get a copy from her if you need it)
-# setup
-# leyte <- read_db("Leyte")
-# anem_db <- leyte %>% 
-#   tbl("anemones") %>% 
-#   select(anem_table_id, dive_table_id, anem_id) %>% 
-#   filter(!is.na(anem_id), anem_id != "-9999") %>% 
-#   collect()
-# dive_db <- leyte %>% 
-#   tbl("diveinfo") %>% 
-#   select(dive_table_id, site) %>% 
-#   collect()
-# anem_db <- left_join(anem_db, dive_db, by = "dive_table_id")
-# anem_site <- anem_db %>% 
-#   select(anem_id, site) %>% 
-#   distinct()
-# save(anem_site, file="data/anem_site.Rdata")
-# fish_db <- leyte %>%
-#   tbl("clownfish") %>%
-#   select(fish_table_id, anem_table_id, recap, tag_id) %>%
-#   filter(!is.na(tag_id)) %>%
-#   collect()
-# save(fish_db, file = "data/fish_db.Rdata")
-
 
 # ---------------------------------------------
 #   adjust formatting ####
@@ -249,9 +217,18 @@ anem_site <- anem_db %>%
   misplaced <- clown %>% 
     filter(is.na(anem_spp), 
       !is.na(depth) | !is.na(gps) |
-      !is.na(anem_dia) | !is.na(egg_height)) %>% 
+        !is.na(anem_dia) | !is.na(egg_height)) %>% 
     filter(!is.na(anem_id) & anem_spp != "EMPT")
   
+  
+# is the same old_anem_id used for multiple anems?
+  
+double <- clown %>% 
+  group_by(old_anem_id) %>% 
+  summarise(count = n()) %>% 
+  filter(count > 1)
+  
+    
   # someday when we want to separate multiple fish on one untagged anem to make it not look like multiple anems, can check if the time is the same for multiple fish (or is time the same for identical anems) - this won't work well because it will be hard to tell if it is more than one anem or one anem recorded several times.
   
   
@@ -292,7 +269,7 @@ clown <- clown %>%
     
     
 
-tag_ids <- clown %>% select(contains("tag")) %>% filter(!is.na(tag_id))
+tag_ids <- clown %>% select(tag_id) %>% filter(!is.na(tag_id))
 
 # ---------------------------------------------
 #   compare scans to datasheets
@@ -304,6 +281,8 @@ clown %>%
   filter(tag_id %in% spreadsheet$tag_id) %>% 
   select(dive_num, obs_time, tag_id)
 
+# if there are rows in spreadsheet, view pit and compare
+
 
 # What tags are in the scanner that are not in spreadsheet (type-os) - should return 0 rows
 anti_join(pit, tag_ids, by = c("scan" = "tag_id"))  
@@ -311,6 +290,22 @@ anti_join(pit, tag_ids, by = c("scan" = "tag_id"))
 
 # view any problems that need to be taken care of
 problem
+
+
+
+
+# testing ####
+# # an anemone came back as being listed in both Caridad and Hicgop South. This anemone is definitely in Hicgop, looking into database to see when it was ever recorded in Caridad.
+# load("data/db_backups/anemones_db.Rdata")
+# weird <- anem %>% 
+#   filter(anem_id == 305)
+# weird$corr_message
+# 
+# # the correction message says changed anem_id from 15 to NULL but the anem_id is not NULL, it is 305.  Very weird.  Let's get the info to go back to the data sheet - ok, changed anem_obs, not anem_id.  Fixed in db
+# 
+# load("data/db_backups/diveinfo_db.Rdata")
+# dive <- dive %>% 
+#   filter(dive_table_id %in% weird$dive_table_id)
 
 
 # # do we have any tags that are scanned as Y and only appear once - compare to db? - # Doesn't seem to be working as of 3/15/18; pulls out 986112100172598 and 986112100172301, both of which were scanned in 2017 when connect directly to database and check...
@@ -331,7 +326,4 @@ problem
 
 # should be 0 obs ####
 
-
-# are there any anemones that lack a description?
 # fish anems - vs anem obs
-

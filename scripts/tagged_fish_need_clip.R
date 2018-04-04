@@ -11,16 +11,6 @@ library(lubridate)
 source("scripts/field_helpers.R")
 
 #################### Running things: ####################
-# import data from database in the field (no network connection) ####
-# clown <- read.csv(file = "data/db_backups/clownfish.csv", na = "NULL", stringsAsFactors = F)
-# anem <- read.csv(file = "data/db_backups/anemones.csv", na = "NULL", stringsAsFactors = F)
-# dive <- read.csv(file = "data/db_backups/diveinfo.csv", na = "NULL", stringsAsFactors = F)
-# pit <- read.csv(file = "data/db_backups/pitscan.csv", na = "NULL", stringsAsFactors = F)
-# # create rdata from db_backups
-# save(clown, file = "data/clownfish_db.Rdata")
-# save(anem, file = "data/anemones_db.Rdata")
-# save(dive, file = "data/diveinfo_db.Rdata")
-# save(pit, file = "data/pitscan_db.Rdata")
 load(file = "data/db_backups/clownfish_db.Rdata") 
 load(file = "data/db_backups/anemones_db.Rdata")
 load(file = "data/db_backups/diveinfo_db.Rdata")

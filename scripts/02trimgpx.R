@@ -18,13 +18,11 @@ source("scripts/field_helpers.R")
 
 get_from_google()
 
-# # if network connection is not available, find the latest save in the data folder ####
-# # load data from saved if network connection is lost ####
-# # get list of files
-# clown_files <- sort(list.files(path = "data/google_sheet_backups/", pattern = "clown_201*"), decreasing = T)
-# dive_files <- sort(list.files(path = "data/google_sheet_backups/", pattern = "dive_201*"), decreasing = T)
-# load(file = paste("data/google_sheet_backups/", clown_files[1], sep = ""))
-# load(file = paste("data/google_sheet_backups/", dive_files[1], sep = ""))
+# # if no network
+# get_data_no_net()
+# load(clown_filename)
+# load(dive_filename)
+
 
 surv <- dive
 names(surv) <- stringr::str_to_lower(names(surv))

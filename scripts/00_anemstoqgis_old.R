@@ -12,16 +12,15 @@ source("scripts/field_helpers.R")
 
 get_from_google()
 
-# load data from saved if network connection is lost ####
-# get list of files
-# clown_files <- sort(list.files(path = "data/", pattern = "clown_201*"), decreasing = T)
-# dive_files <- sort(list.files(path = "data/", pattern = "dive_201*"), decreasing = T)
-# load(file = paste("data/", clown_files[1], sep = ""))
-# load(file = paste("data/", dive_files[1], sep = ""))
+# # if no network
+# get_data_no_net()
+# load(clown_filename)
+# load(dive_filename)
+
 
 anem <- clown %>% 
   filter(!is.na(anem_spp)) %>% # we only want anem_obs, not fish_obs 
-  select(dive_num, obs_time, gps, anem_id)
+  select(dive_num, obs_time, gps, anem_id, anem_spp)
 # if gps was not specified on the line, use Michelle's gps because she was the anem obs person on the early dives.
 anem <- anem %>% 
   mutate(gps = ifelse(is.na(gps), 4, gps)) %>% 
@@ -43,19 +42,11 @@ no_gps <- anem %>%
   filter(is.na(obs_time))
 anem <- anti_join(anem, no_gps)
 
-# combine the date_time and assign the Philippines time zone
-anem <- anem %>%
-  mutate(obs_time = force_tz(ymd_hms(str_c(date, obs_time, sep = " ")), tzone = "Asia/Manila"), 
-    gps = as.character(gps))
-
-# convert to UTC
-anem <- anem %>% 
-  mutate(obs_time = with_tz(obs_time, tzone = "UTC"), 
-    id = 1:nrow(anem))
-
 # in order to use the **assign_gpx function**, need a table that contains an id, gps unit, and a date_time that have been converted to UTC time zone - the date_time column must be called "obs_time"
 # debugonce(assign_gpx_field)
 coord_table <- assign_gpx_field(anem) 
+
+### WAIT ###
 
 coord_table <- distinct(coord_table)
 
@@ -76,12 +67,6 @@ anem <- anem %>%
 anem %>%
   select(obs_time, lat, lon, anem_id)
 
-anem <- anem %>%
-<<<<<<< HEAD
-  select(lat, lon, obs_time, site, anem_id) ##ALLISON NOTE: added year here b/c was needed in write_csv line below ## MRS - removed year because it doesn't exist in the table?
-=======
-  select(lat, lon, obs_time, anem_id) ##ALLISON NOTE: added year hear b/c was needed in write_csv line below ## MRS - removed year because it doesn't exist in the table?
->>>>>>> f99f4d46f510010e91f33a305f5043d51c2a0992
 out <- anem
 # out <- rbind(fish,anem)
 out <- distinct(out)
@@ -93,5 +78,5 @@ out <- distinct(out)
 #     mlon = mean(lon, na.rm = T))
 
 
-write_csv(out, str_c("../Phils_GIS_R/data/Anems/GPSSurvey_anemlatlon_forQGIS_2018_", Sys.Date(), ".csv", sep = ""))
+# write_csv(out, str_c("../Phils_GIS_R/data/Anems/GPSSurvey_anemlatlon_forQGIS_2018_", Sys.Date(), ".csv", sep = ""))
 

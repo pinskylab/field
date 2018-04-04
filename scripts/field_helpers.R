@@ -1,5 +1,6 @@
 # helper scripts for field work
 library(dplyr)
+library(lubridate)
 # read_db ####
 #' views all of the fish recaptured at a given site
 #' @export
@@ -451,7 +452,8 @@ get_from_google <- function(){
   # gs_auth(new_user = TRUE) # run this if having authorization problems
   mykey <- '1symhfmpQYH8k9dAvp8yV_j_wCTpIT8gO9No4s2OIQXo' # access the file
   entry <-gs_key(mykey)
-  clown <<-gs_read(entry, ws='clownfish')
+  clown <<-gs_read(entry, ws='clownfish') %>% 
+    mutate(obs_time = as.character(obs_time))
   dive <<- gs_read(entry, ws="diveinfo")
   
   # save data in case network connection is lost
@@ -470,7 +472,17 @@ get_from_google <- function(){
 #' @examples 
 #' result <- assign_gpx_field(anem_table)
 assign_gpx_field <- function(id_table){
-  library(lubridate)
+  
+  # need to be able to compare dates and times
+  id_table <- id_table %>% 
+    mutate(obs_time = force_tz(ymd_hms(str_c(date, obs_time, sep = " ")), tzone = "Asia/Manila"), 
+      gps = as.character(gps))
+  
+  # convert to UTC
+  id_table <- id_table %>% 
+    mutate(obs_time = with_tz(obs_time, tzone = "UTC"), 
+      id = 1:nrow(id_table))
+  
   id_table <- id_table %>% 
     mutate(month = month(obs_time), 
       day = day(obs_time), 
@@ -532,10 +544,109 @@ assign_gpx_field <- function(id_table){
       mlon = mean(lon, na.rm = T))
   
   # drop all of the unneccessary columns from anem and join with the coord
-  id_table <- select(id_table, contains("id"), gps, dive_num, obs_time)
+  id_table <- id_table %>% 
+    select(gps, dive_num, obs_time, ends_with("id"), anem_spp)
   
   id_table <- left_join(coord, id_table, by = "id") %>% 
     rename(lat = mlat, 
-      lon = mlon)
+      lon = mlon) %>% 
+    distinct()
   return(id_table)
+}
+
+# get_data_no_net ####
+#' get the data when no network is present
+#' @export
+#' @name get_data_no_net
+#' @author Michelle Stuart
+#' @examples 
+#' get_data_no_net()
+
+get_data_no_net <- function(){
+  # load data from saved if network connection is lost ####
+  # get list of files
+  clown_files <- sort(list.files(path = "data/google_sheet_backups/", pattern = "clown_201*"), decreasing = T)
+  dive_files <- sort(list.files(path = "data/google_sheet_backups/", pattern = "dive_201*"), decreasing = T)
+  clown_filename <<- paste("data/google_sheet_backups/", clown_files[1], sep = "")
+  dive_filename <<- paste("data/google_sheet_backups/", dive_files[1], sep = "")
+  
+}
+
+assign_db_gpx_field <- function() {
+  # get past data  - in the field ####
+  load("data/db_backups/anemones_db.Rdata")
+  anem <- anem %>% 
+    select(anem_table_id, dive_table_id, obs_time, old_anem_id, anem_id, anem_obs, anem_spp) %>% 
+    filter(!is.na(anem_id))
+  
+  
+  # assign gps from db ####
+  # need date and gps unit - in the field ####
+  load("data/db_backups/diveinfo_db.Rdata")
+  dive <- dive %>% 
+    select(dive_table_id, date, gps) %>% 
+    filter(dive_table_id %in% anem$dive_table_id)
+  
+  anem_dive <- left_join(anem, dive, by = "dive_table_id")
+  
+  # need to be able to compare dates and times
+  anem_dive <- anem_dive %>% 
+    mutate(obs_time = force_tz(ymd_hms(str_c(date, obs_time, sep = " ")), tzone = "Asia/Manila"), 
+      gps = as.integer(gps))
+  
+  # convert to UTC
+  anem_dive <- anem_dive %>% 
+    mutate(obs_time = with_tz(obs_time, tzone = "UTC"), 
+      id = 1:nrow(anem_dive))
+  
+  anem_dive <- anem_dive %>% 
+    mutate(month = month(obs_time), 
+      day = day(obs_time), 
+      hour = hour(obs_time), 
+      min = minute(obs_time), 
+      sec = second(obs_time), 
+      year = year(obs_time))
+  
+  # get table of lat lon data ####
+  load("data/db_backups/gpx_db.Rdata")
+  
+  gpx <- gpx %>%
+    filter(unit %in% anem_dive$gps) %>% 
+    mutate(month = month(time), 
+      day = day(time), 
+      hour = hour(time), 
+      min = minute(time), 
+      sec = second(time), 
+      year = year(time), 
+      lat = as.character(lat), # to prevent from importing as factors
+      lon = as.character(lon), 
+      time = as.character(time)) %>% 
+    rename(gps = unit)
+  
+  #### WAIT ####
+  
+  # find matches for times to assign lat long - there are more than one set of seconds (sec.y) that match
+  anem_dive <- left_join(anem_dive, gpx, by = c("gps", "month", "day", "hour", "min", "year")) %>% 
+    mutate(lat = as.numeric(lat), 
+      lon = as.numeric(lon)) %>% 
+    select(-contains("sec"))
+  # need to make decimal 5 digits - why? because that is all the gps can hold
+  
+  # calculate a mean lat lon for each anem observation (currently there are 4 because a reading was taken every 15 seconds)
+  coord <- anem_dive %>%
+    group_by(id) %>% # id should be referring to one row of the data
+    summarise(mlat = mean(lat, na.rm = TRUE),
+      mlon = mean(lon, na.rm = T))
+  
+  # drop all of the unneccessary columns from anem and join with the coord
+  anem_gpx <- anem_dive %>% 
+    select(old_anem_id, anem_id, anem_obs, id, anem_spp)
+  
+  db_anem_gpx <- left_join(coord, anem_gpx, by = "id") %>% 
+    rename(lat = mlat, 
+      lon = mlon) %>% 
+    distinct() %>% 
+    select(-id) %>% 
+    mutate(era = "past")
+  return(db_anem_gpx)
 }
