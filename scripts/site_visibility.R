@@ -118,7 +118,7 @@ dives_annualAvg <- dives_annualAvg %>%
   
 #################### Plots! ####################
 #mean vis for Albuera sites, all dives counted as individual obs, not averaged by date first
-pdf(file = "Albuera_AvgVis.pdf")
+pdf(file = "plots/Albuera_AvgVis.pdf")
 ggplot(data = (dives_Avg %>% filter(site %in% Albuera_sites)), aes(x=year, y=avg_vis, color=site, shape=site)) +
   geom_point(size=5.0, position=position_dodge(width=0.1)) +
   ggtitle('Mean visibility through time at Albuera sites') +
@@ -128,7 +128,7 @@ ggplot(data = (dives_Avg %>% filter(site %in% Albuera_sites)), aes(x=year, y=avg
 dev.off()
 
 #mean vis for all sites, all dives counted as individual obs, not averaged by date first
-pdf(file = "AllSites_AvgVis.pdf")
+pdf(file = "plots/AllSites_AvgVis.pdf")
 ggplot(data = dives_Avg, aes(x=year, y=avg_vis, color=site)) +
   geom_point(size=4.0, position=position_dodge(width=0.1)) +
   ggtitle('Mean visibility through time at all sites') +
@@ -138,7 +138,7 @@ ggplot(data = dives_Avg, aes(x=year, y=avg_vis, color=site)) +
 dev.off()
 
 #mean and min-max range, all dives counted as individual obs (even multiple people on the same dive), averaged by day first
-pdf(file = "Albuera_AvgVisMaxMin.pdf")
+pdf(file = "plots/Albuera_AvgVisMaxMin.pdf")
 ggplot(data = (dives_annualAvg %>% filter(site %in% Albuera_sites)), aes(x=year, y=avg_vis, color=site, shape=site)) +
   geom_pointrange(aes(ymin=min_vis, ymax=max_vis), size=1.0, position=position_dodge(width=0.3)) +
   ggtitle('Visibility through time at Albuera sites (mean with min-max range)') +
