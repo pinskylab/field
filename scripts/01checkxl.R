@@ -147,7 +147,7 @@ anem_ids <- clown %>%
 x <- c(2938:max(anem_ids$anem_id)) #2938 is the first anem_id for 2018
 y <- data.frame(x) %>% 
   rename(anem_id = x) %>% 
-  filter(anem_id != 3101, anem_id != 3015, anem_id != 2947, anem_id !=3168, anem_id != 3223) # these tags were probably dropped
+  filter(anem_id != 3101, anem_id != 3015, anem_id != 2947, anem_id !=3168, anem_id != 3223, anem_id != 3239) # these tags were probably dropped
 
 bad <- anti_join(y, anem_ids)
 if (nrow(bad) > 0){
