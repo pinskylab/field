@@ -46,7 +46,6 @@ coord <- left_join(coord, means) %>%
 
 write_csv(coord, str_c("data/unreadable_anems", Sys.Date(), ".csv", sep = ""))
 
-### MOVE THIS CSV TO THE PHILS_GIS_R DATA DIRECTORY ###
 }else{
   print("all anems are defined")
 }
