@@ -161,17 +161,30 @@ if (nrow(bad) > 0){
 # are there anemones listed at a different site than they were in other years? Don't include new tags - in 2018 2938 was first tag ####
 google_dive <- dive
 
-  # field use
-load("data/db_backups/anemones_db.Rdata")
- anem_db <- anem %>% 
-    select(anem_table_id, dive_table_id, anem_id) %>%
-    filter(!is.na(anem_id), anem_id != "-9999", anem_id != "NULL") %>%
-  mutate(dive_table_id = as.numeric(dive_table_id))
+#   # field use
+# load("data/db_backups/anemones_db.Rdata")
+#  anem_db <- anem %>% 
+#     select(anem_table_id, dive_table_id, anem_id) %>%
+#     filter(!is.na(anem_id), anem_id != "-9999", anem_id != "NULL") %>%
+#   mutate(dive_table_id = as.numeric(dive_table_id))
+# 
+#  load("data/db_backups/diveinfo_db.Rdata")
+#   dive_db <- dive %>%
+#     select(dive_table_id, site) 
+#   rm(dive)
 
- load("data/db_backups/diveinfo_db.Rdata")
-  dive_db <- dive %>%
-    select(dive_table_id, site) 
-  rm(dive)
+# # lab use
+leyte <- read_db("Leyte")
+anem_db <- leyte %>% 
+  tbl("anemones") %>% 
+  select(anem_table_id, dive_table_id, anem_id) %>%
+  filter(!is.na(anem_id), anem_id != "-9999", anem_id != "NULL") %>%
+  collect()
+dive_db <- leyte %>% 
+  tbl("diveinfo") %>% 
+  select(dive_table_id, site) %>% 
+  collect()
+  
   
 anem_db <- left_join(anem_db, dive_db, by = "dive_table_id")
 anem_site <- anem_db %>%
@@ -193,7 +206,7 @@ anem_site <- anem_db %>%
     distinct()
   
   # compare the two tables # diff 
-  bad <- left_join(new_anem_site, anem_site) %>% 
+  bad <- left_join(new_anem_site, anem_site, copy = T, by = "anem_id") %>% 
     filter(old_site != site | is.na(site)) #need to figure out how to get filter to keep nas, bad work-around at the moment
   
   # %>% 
@@ -269,7 +282,7 @@ clown <- clown %>%
     
     
 
-tag_ids <- clown %>% select(tag_id) %>% filter(!is.na(tag_id))
+tag_ids <- clown %>% select(tag_id, recap) %>% filter(!is.na(tag_id))
 
 # ---------------------------------------------
 #   compare scans to datasheets
@@ -287,6 +300,15 @@ clown %>%
 # What tags are in the scanner that are not in spreadsheet (type-os) - should return 0 rows
 anti_join(pit, tag_ids, by = c("scan" = "tag_id"))  
 # 818456 was scanned but the fish escaped before they could be tagged so as of 2018-03-14  it has not been used yet.
+
+# make sure that pit tags with N only occur once on the data sheet
+multi <- tag_ids %>% 
+  filter(recap == "N") %>% 
+  group_by(tag_id) %>% 
+  summarise(tag_count = n()) %>% 
+  filter(tag_count > 1)
+
+# if multi is not zero rows, there is a type-o in one of the rows for each tag listed, double check these. (the recent anti_join(pit, tag_ids) should have also flagged this)
 
 # view any problems that need to be taken care of
 problem
