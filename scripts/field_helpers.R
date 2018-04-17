@@ -572,6 +572,88 @@ get_data_no_net <- function(){
   
 }
 
+assign_db_gpx <- function() {
+  # get past data  - in the lab ####
+  leyte <- read_db("Leyte")
+  anem <- leyte %>% 
+    tbl("anemones") %>% 
+    select(anem_table_id, dive_table_id, obs_time, old_anem_id, anem_id, anem_obs, anem_spp) %>% 
+    filter(!is.na(anem_id)) %>% 
+    collect()
+  
+  # assign gps from db ####
+  # need date and gps unit - in the lab ####
+  dive <- leyte %>% 
+    tbl("diveinfo") %>% 
+    select(dive_table_id, date, gps) %>% 
+    filter(dive_table_id %in% anem$dive_table_id) %>% 
+    collect()
+  
+  anem_dive <- left_join(anem, dive, by = "dive_table_id")
+  
+  # need to be able to compare dates and times
+  anem_dive <- anem_dive %>% 
+    mutate(obs_time = force_tz(ymd_hms(str_c(date, obs_time, sep = " ")), tzone = "Asia/Manila"), 
+      gps = as.integer(gps))
+  
+  # convert to UTC
+  anem_dive <- anem_dive %>% 
+    mutate(obs_time = with_tz(obs_time, tzone = "UTC"), 
+      id = 1:nrow(anem_dive))
+  
+  anem_dive <- anem_dive %>% 
+    mutate(month = month(obs_time), 
+      day = day(obs_time), 
+      hour = hour(obs_time), 
+      min = minute(obs_time), 
+      sec = second(obs_time), 
+      year = year(obs_time))
+  
+  # get table of lat lon data ####
+  gpx <- leyte %>% 
+    tbl("GPX") %>% 
+    filter(unit %in% anem_dive$gps) %>% 
+    collect(n = Inf) %>% 
+    mutate(month = month(time), 
+      day = day(time), 
+      hour = hour(time), 
+      min = minute(time), 
+      sec = second(time), 
+      year = year(time), 
+      lat = as.character(lat), # to prevent from importing as factors
+      lon = as.character(lon), 
+      time = as.character(time)) %>% 
+    rename(gps = unit)
+  
+  #### WAIT ####
+  
+  # find matches for times to assign lat long - there are more than one set of seconds (sec.y) that match
+  anem_dive <- left_join(anem_dive, gpx, by = c("gps", "month", "day", "hour", "min", "year")) %>% 
+    mutate(lat = as.numeric(lat), 
+      lon = as.numeric(lon)) %>% 
+    select(-contains("sec"))
+  # need to make decimal 5 digits - why? because that is all the gps can hold
+  
+  # calculate a mean lat lon for each anem observation (currently there are 4 because a reading was taken every 15 seconds)
+  coord <- anem_dive %>%
+    group_by(id) %>% # id should be referring to one row of the data
+    summarise(mlat = mean(lat, na.rm = TRUE),
+      mlon = mean(lon, na.rm = T))
+  
+  # drop all of the unneccessary columns from anem and join with the coord
+  anem_gpx <- anem_dive %>% 
+    select(old_anem_id, anem_id, anem_obs, id, anem_spp)
+  
+  db_anem_gpx <- left_join(coord, anem_gpx, by = "id") %>% 
+    rename(lat = mlat, 
+      lon = mlon) %>% 
+    distinct() %>% 
+    select(-id) %>% 
+    mutate(era = "past")
+  return(db_anem_gpx)
+}
+
+
 assign_db_gpx_field <- function() {
   # get past data  - in the field ####
   load("data/db_backups/anemones_db.Rdata")

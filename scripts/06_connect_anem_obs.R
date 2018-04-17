@@ -3,7 +3,8 @@ library(stringr)
 source("scripts/field_helpers.R")
 
 # get past anems from db and assign lat lons
-past_anem <- assign_db_gpx_field()
+# past_anem <- assign_db_gpx_field()
+past_anem <- assign_db_gpx()
 
 ### WAIT ### this takes quite a bit of time - is there a way to improve the code?
 
@@ -158,11 +159,6 @@ current <- all_anem %>%
     !anem_id %in% empt$anem_id) %>% 
   select(-anem_spp, -old_anem_id, -era) %>% 
   distinct()
-
-
-
-
-
 
 write.csv(past, file = "../Phils_GIS_R/data/Anems/past_anems.csv")
 write.csv(current, file = "../Phils_GIS_R/data/Anems/current_anems.csv")
