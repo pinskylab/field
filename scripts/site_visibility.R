@@ -31,6 +31,7 @@ vis_convert <- data.frame(vis_rec, vis_max, vis_min, vis_avg)
 
 # Sets of sites
 Albuera_sites <- c("Palanas", "Wangag", "Magbangon N", "Magbangon S", "Cabatoan")
+spring_months <- c(3,4,5,6,7) #use to avoid Jan 2015 dives (lots of divers, visibility estimates might be unreliable)
 
 # Visibility (in m) for years when it was judged too poor to dive
 Cab2017vis <- 1
@@ -84,6 +85,10 @@ dives <- leyte %>%
   mutate(year = as.integer(substring(date,1,4))) %>%
   mutate(month = as.integer(substring(date,6,7))) 
 
+# If want to, filter out the winter 2015 sampling dates (by only including dives in "spring" dates)
+dives <- dives %>%
+  filter(month %in% spring_months)
+
 # Filter out just Magbangon dives so can assess whether they were north or south Magbangon, so can treat those two sites separately
 Mag_dives <- dives %>%
   filter(site == "Magbangon")
@@ -105,30 +110,58 @@ Mag_repanem <- Mags %>%
   summarize(rep_anem = na.omit(anem_id)[1]) #select one representative anem from each dive 
 
 # Using QGIS map in Phils_GIS_R repository, look to see if the anem_ids representative of each dive are in the north or south part of the site
+# (updated for just spring months - omitting Jan-Feb 2015 dives)
 year_vec <- c(2012,2012,2012,
               2013,2013,2013,2013,
               2014,2014,2014,2014,
-              2015,2015,2015,2015,2015,2015,2015,
+              2015,2015,2015,
               2016,2016,2016,2016,2016,2016,2016,2016,2016,2016,
               2018,2018,2018) #(no dives in Magbangon in 2017 b/c vis too bad)
 dive_num_vec <- c(11.1,12,13, #2012
                   21,22,25,39, #2013
                   20,21,33,46, #2014
-                  13,14,14.5,15,19,30,57, #2015
+                  13,14,15, #2015
                   13,34,36,37,38,39,40,41,42,48, #2016
                   8,37,38) #2018 
 rep_anem_vec <- c(NA,NA,NA, #2012
                   211,213,NA,367, #2013
                   471,509,681,725, #2014
-                  2089,2092,932,2114,1113,1356,1294, #2015
+                  2089,2092,2114, #2015
                   2000,2407,2411,NA,2419,2426,2434,2441,2456,2516, #2016
                   2956,3182,3190) #2018 
-rep_anem_site <- c("Magbangon S","Magbangon S","Magbangon N",
-                   "Magbangon N","Magbangon S",NA,"Magbangon N",
-                   "Magbangon S","Magbangon N","Magbangon N","Magbangon S",
-                   "Magbangon N","Magbangon N","Magbangon S","Magbangon N","Magbangon S","Magbangon N","Magbangon N",
+rep_anem_site <- c("Magbangon S","Magbangon S","Magbangon N", #2012
+                   "Magbangon N","Magbangon S",NA,"Magbangon N", #2013
+                   "Magbangon S","Magbangon N","Magbangon N","Magbangon S", #2014
+                   "Magbangon N","Magbangon N","Magbangon N", #2015
                    "Magbangon N","Magbangon N","Magbangon N",NA,"Magbangon N","Magbangon N","Magbangon S","Magbangon S","Magbangon S","Magbangon N",
                    "Magbangon S","Magbangon S","Magbangon S")
+
+# This list is if using Jan-Feb 2015 dives too
+# # Using QGIS map in Phils_GIS_R repository, look to see if the anem_ids representative of each dive are in the north or south part of the site
+# year_vec <- c(2012,2012,2012,
+#               2013,2013,2013,2013,
+#               2014,2014,2014,2014,
+#               2015,2015,2015,2015,2015,2015,2015,
+#               2016,2016,2016,2016,2016,2016,2016,2016,2016,2016,
+#               2018,2018,2018) #(no dives in Magbangon in 2017 b/c vis too bad)
+# dive_num_vec <- c(11.1,12,13, #2012
+#                   21,22,25,39, #2013
+#                   20,21,33,46, #2014
+#                   13,14,14.5,15,19,30,57, #2015
+#                   13,34,36,37,38,39,40,41,42,48, #2016
+#                   8,37,38) #2018 
+# rep_anem_vec <- c(NA,NA,NA, #2012
+#                   211,213,NA,367, #2013
+#                   471,509,681,725, #2014
+#                   2089,2092,932,2114,1113,1356,1294, #2015
+#                   2000,2407,2411,NA,2419,2426,2434,2441,2456,2516, #2016
+#                   2956,3182,3190) #2018 
+# rep_anem_site <- c("Magbangon S","Magbangon S","Magbangon N",
+#                    "Magbangon N","Magbangon S",NA,"Magbangon N",
+#                    "Magbangon S","Magbangon N","Magbangon N","Magbangon S",
+#                    "Magbangon N","Magbangon N","Magbangon S","Magbangon N","Magbangon S","Magbangon N","Magbangon N",
+#                    "Magbangon N","Magbangon N","Magbangon N",NA,"Magbangon N","Magbangon N","Magbangon S","Magbangon S","Magbangon S","Magbangon N",
+#                    "Magbangon S","Magbangon S","Magbangon S")
 
 # Put the Magbangon info together into a dataframe
 Mag_df <- as.data.frame(cbind(year_vec, dive_num_vec, rep_anem_vec, rep_anem_site), stringsAsFactors=FALSE) %>% 
@@ -166,24 +199,24 @@ for(i in 1:length(dives$dive_table_id)) {
 # Convert ranges (like "2 to 3" entered into the database to numbers (either max, min, or average of range))
 dives_visClean <- convertVisRangeToNum(dives, vis_convert, 'avgV')
 
-# Average by day to get one vis obs per day - this doesn't separate out N-S Magbangon
-dives_dailyAvg <- dives_visClean %>% 
-  group_by(year, org_site, date) %>% 
-  summarize(daily_avg_vis = mean(visibility_m_clean, na.rm = TRUE), nobs = n())
-
-# Find mean/max/min vis each year at each site, averaging across days rather than individual dives - also doesn't separate out N-S Magbangon
-dives_annualAvg <- dives_dailyAvg %>%
-  group_by(year, org_site) %>%
-  summarise(avg_vis = mean(daily_avg_vis, na.rm = TRUE), min_vis = min(daily_avg_vis, na.rm = TRUE), max_vis = max(daily_avg_vis, na.rm = TRUE), ndays = n())
-
-#for some reason, this isn't working...
-dives_annualAvg <- dives_annualAvg %>% #replace the NA vis for 2017 Cab and Mag to set min values - doesn't separate out N-S Magbangon
-  mutate(avg_vis = ifelse((year == 2017 & org_site == "Cabatoan"), Cab2017vis, avg_vis)) %>%
-  mutate(min_vis = ifelse((year == 2017 & org_site == "Cabatoan"), Cab2017vis, min_vis)) %>%
-  mutate(max_vis = ifelse((year == 2017 & org_site == "Cabatoan"), Cab2017vis, max_vis)) #%>%
-  mutate(avg_vis = ifelse((year == 2017 & org_site == "Magbangon"), Mag2017vis, avg_vis)) %>%
-  mutate(min_vis = ifelse((year == 2017 & org_site == "Magbangon"), Mag2017vis, min_vis)) %>%
-  mutate(max_vis = ifelse((year == 2017 & org_site == "Magbangon"), Mag2017vis, max_vis)) 
+# # Average by day to get one vis obs per day - this doesn't separate out N-S Magbangon
+# dives_dailyAvg <- dives_visClean %>% 
+#   group_by(year, org_site, date) %>% 
+#   summarize(daily_avg_vis = mean(visibility_m_clean, na.rm = TRUE), nobs = n())
+# 
+# # Find mean/max/min vis each year at each site, averaging across days rather than individual dives - also doesn't separate out N-S Magbangon
+# dives_annualAvg <- dives_dailyAvg %>%
+#   group_by(year, org_site) %>%
+#   summarise(avg_vis = mean(daily_avg_vis, na.rm = TRUE), min_vis = min(daily_avg_vis, na.rm = TRUE), max_vis = max(daily_avg_vis, na.rm = TRUE), ndays = n())
+# 
+# #for some reason, this isn't working...
+# dives_annualAvg <- dives_annualAvg %>% #replace the NA vis for 2017 Cab and Mag to set min values - doesn't separate out N-S Magbangon
+#   mutate(avg_vis = ifelse((year == 2017 & org_site == "Cabatoan"), Cab2017vis, avg_vis)) %>%
+#   mutate(min_vis = ifelse((year == 2017 & org_site == "Cabatoan"), Cab2017vis, min_vis)) %>%
+#   mutate(max_vis = ifelse((year == 2017 & org_site == "Cabatoan"), Cab2017vis, max_vis)) #%>%
+#   mutate(avg_vis = ifelse((year == 2017 & org_site == "Magbangon"), Mag2017vis, avg_vis)) %>%
+#   mutate(min_vis = ifelse((year == 2017 & org_site == "Magbangon"), Mag2017vis, min_vis)) %>%
+#   mutate(max_vis = ifelse((year == 2017 & org_site == "Magbangon"), Mag2017vis, max_vis)) 
 
 # Easier to add visibility for non-dived times at Magbangon before calculate average vis
 dives_visC <- dives_visClean %>% #select relevant columns
@@ -220,26 +253,26 @@ ggplot(data = (dives_Avg %>% filter(site %in% Albuera_sites)), aes(x=year, y=avg
   theme_bw()
 dev.off()
 
-#mean vis for all sites, all dives counted as individual obs, not averaged by date first
-pdf(file = "plots/AllSites_AvgVis.pdf")
-ggplot(data = dives_Avg, aes(x=year, y=avg_vis, color=site)) +
-  geom_point(size=4.0, position=position_dodge(width=0.1)) +
-  ggtitle('Mean visibility through time at all sites') +
-  labs(x='year', y='average vis (m)') +
-  scale_x_continuous(breaks=c(2012,2013,2014,2015,2016,2017,2018)) +
-  theme_bw()
-dev.off()
-
-#mean and min-max range, all dives counted as individual obs (even multiple people on the same dive), averaged by day first
-pdf(file = "plots/Albuera_AvgVisMaxMin.pdf")
-ggplot(data = (dives_annualAvg %>% filter(site %in% Albuera_sites)), aes(x=year, y=avg_vis, color=site, shape=site)) +
-  geom_pointrange(aes(ymin=min_vis, ymax=max_vis), size=1.0, position=position_dodge(width=0.3)) +
-  ggtitle('Visibility through time at Albuera sites (mean with min-max range)') +
-  labs(x='year', y='average vis (m) with min-max range') +
-  scale_x_continuous(breaks=c(2012,2013,2014,2015,2016,2017,2018)) +
-  scale_y_continuous(limits = c(0,16)) +
-  theme_bw()
-dev.off()
+# #mean vis for all sites, all dives counted as individual obs, not averaged by date first
+# pdf(file = "plots/AllSites_AvgVis.pdf")
+# ggplot(data = dives_Avg, aes(x=year, y=avg_vis, color=site)) +
+#   geom_point(size=4.0, position=position_dodge(width=0.1)) +
+#   ggtitle('Mean visibility through time at all sites') +
+#   labs(x='year', y='average vis (m)') +
+#   scale_x_continuous(breaks=c(2012,2013,2014,2015,2016,2017,2018)) +
+#   theme_bw()
+# dev.off()
+# 
+# #mean and min-max range, all dives counted as individual obs (even multiple people on the same dive), averaged by day first
+# pdf(file = "plots/Albuera_AvgVisMaxMin.pdf")
+# ggplot(data = (dives_annualAvg %>% filter(site %in% Albuera_sites)), aes(x=year, y=avg_vis, color=site, shape=site)) +
+#   geom_pointrange(aes(ymin=min_vis, ymax=max_vis), size=1.0, position=position_dodge(width=0.3)) +
+#   ggtitle('Visibility through time at Albuera sites (mean with min-max range)') +
+#   labs(x='year', y='average vis (m) with min-max range') +
+#   scale_x_continuous(breaks=c(2012,2013,2014,2015,2016,2017,2018)) +
+#   scale_y_continuous(limits = c(0,16)) +
+#   theme_bw()
+# dev.off()
 
 # ##### OLD CODE, not useful
 
