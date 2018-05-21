@@ -4,6 +4,7 @@
 
 #################### Set-up: ####################
 # Load relevant libraries
+library(RMySQL) 
 library(dplyr)
 #library(tidyr)
 #library(tidyverse)
@@ -11,19 +12,20 @@ library(lubridate)
 #library(dbplyr)
 library(ggplot2)
 
-# Load database files
-#load(file = "data/db_backups/clownfish_db.Rdata") 
-#load(file = "data/db_backups/anemones_db.Rdata")
-load(file = "data/db_backups/diveinfo_db.Rdata")
-
-# Rename so not overwritten by new datasheets when they get loaded
-#clown_db <- clown
-#anem_db <- anem
-dive_db <- dive
-
-# Add year and month as a category to the dives 
-dive_db$year <- as.integer(substring(dive_db$date,1,4)) #add year to dives
-dive_db$month <- as.integer(substring(dive_db$date,6,7)) #add month to dives
+#Old code to load database files before 2018 data was added to the database
+# # Load database files
+# #load(file = "data/db_backups/clownfish_db.Rdata") 
+# #load(file = "data/db_backups/anemones_db.Rdata")
+# load(file = "data/db_backups/diveinfo_db.Rdata")
+# 
+# # Rename so not overwritten by new datasheets when they get loaded
+# #clown_db <- clown
+# #anem_db <- anem
+# dive_db <- dive
+# 
+# # Add year and month as a category to the dives 
+# dive_db$year <- as.integer(substring(dive_db$date,1,4)) #add year to dives
+# dive_db$month <- as.integer(substring(dive_db$date,6,7)) #add month to dives
 
 # Visibility ranges used and the numbers to convert them to
 vis_rec <- c("<1", "2-3", "2 to 3", "2 to 4", "2 to 5", "2 to 6", "2-8", "3 to 4", "3 to 5", "3 to 8", "4m", "4 to 1", "4 to 2", "4 to 3", "4 to 5", "4 decreasing to 2", "5 to 8", "6, lots of particles", "7 - 5 - 1")
@@ -35,11 +37,12 @@ vis_convert <- data.frame(vis_rec, vis_max, vis_min, vis_avg)
 # Notes for testing: 139 is first row in "dive" with a range recorded for visibility_m ("4 to 1")
 
 # Sets of sites
-Albuera_sites <- c("Palanas", "Wangag", "Magbangon", "Cabatoan")
+Albuera_sites <- c("Palanas", "Wangag", "Magbangon N", "Magbangon S", "Cabatoan")
 
 # Visibility (in m) for years when it was judged too poor to dive
 Cab2017vis <- 1
 Mag2017vis <- 1
+MagN2018vis <- 1
 
 #################### Functions: ####################
 source("scripts/field_helpers.R")
@@ -67,26 +70,122 @@ convertVisRangeToNum <- function(df, convertList, vis_choice) { #vis_choice = ma
   return(df)
 }
  
- 
 #################### Running things! ####################
-##### Get 2018 data 
-get_from_google() #this pulls in the data from the 2018 datasheets but will overwrite the saved database files...
+#Old code for getting 2018 data before it was put into the regular database
+# ##### Get 2018 data 
+# get_from_google() #this pulls in the data from the 2018 datasheets but will overwrite the saved database files...
+# 
+# # Select relevant 2018 columns and rename so fits with convertVisRangeToNum function
+# dives_2018 <- dive %>% 
+#   select(dive_id, date, site, visibility) %>%
+#   rename(dive_table_id = dive_id, visibility_m = visibility) %>%
+#   mutate(year = as.integer(substring(date,1,4)))
 
-# Select relevant 2018 columns and rename so fits with convertVisRangeToNum function
-dives_2018 <- dive %>% 
-  select(dive_id, date, site, visibility) %>%
-  rename(dive_table_id = dive_id, visibility_m = visibility) %>%
-  mutate(year = as.integer(substring(date,1,4)))
+##### Pull out info from database
+leyte <- read_db("Leyte")
 
+dives <- leyte %>%
+  tbl("diveinfo") %>%
+  select(dive_table_id, dive_num, date, site, visibility_m) %>%
+  collect() %>%
+  mutate(year = as.integer(substring(date,1,4))) %>%
+  mutate(month = as.integer(substring(date,6,7))) 
+
+# Filter out just Magbangon dives so can assess whether they were north or south Magbangon, so can treat those two sites separately
+Mag_dives <- dives %>%
+  filter(site == "Magbangon")
+
+# Pull out anems just from Magbangon dives so can use QGIS to assign dive to N or S
+Mag_anems <- leyte %>%
+  tbl("anemones") %>%
+  filter(dive_table_id %in% Mag_dives$dive_table_id) %>%
+  select(anem_table_id, dive_table_id, anem_obs, anem_id, old_anem_id) %>%
+  collect()
+
+# Link up the Mag_dives with Mag_anems
+#Mags <- left_join(Mag_anems, Mag_dives, by="dive_table_id")
+Mags <- left_join(Mag_dives, Mag_anems, by="dive_table_id")
+
+# Pull out the first non-NA anem_id seen on each dive (group by year first b/c dive_num gets reset each year)
+Mag_repanem <- Mags %>% 
+  #mutate(dive_num = as.integer(dive_num)) %>%
+  mutate(dive_num =  as.numeric(dive_num)) %>%
+  group_by(year, dive_num) %>%
+  summarize(rep_anem = na.omit(anem_id)[1])
+
+# Using QGIS map in Phils_GIS_R repository, look to see if the anem_ids representative of each dive are in the north or south part of the site
+year_vec <- c(2012,2012,2012,
+              2013,2013,2013,2013,
+              2014,2014,2014,2014,
+              2015,2015,2015,2015,2015,2015,2015,
+              2016,2016,2016,2016,2016,2016,2016,2016,2016,2016,
+              2018,2018,2018) 
+dive_num_vec <- c(11.1,12,13,
+                  21,22,25,39,
+                  20,21,33,46,
+                  13,14,14.5,15,19,30,57,
+                  13,34,36,37,38,39,40,41,42,48,
+                  8,37,38)
+rep_anem_vec <- c(NA,NA,NA,
+                  211,213,NA,367,
+                  471,509,681,725,
+                  2089,2092,932,2114,1113,1356,1294,
+                  2000,2407,2411,NA,2419,2426,2434,2441,2456,2516,
+                  2956,3182,3190)
+rep_anem_site <- c("Magbangon S","Magbangon S","Magbangon N",
+                   "Magbangon N","Magbangon S",NA,"Magbangon N",
+                   "Magbangon S","Magbangon N","Magbangon N","Magbangon S",
+                   "Magbangon N","Magbangon N","Magbangon S","Magbangon N","Magbangon S","Magbangon N","Magbangon N",
+                   "Magbangon N","Magbangon N","Magbangon N",NA,"Magbangon N","Magbangon N","Magbangon S","Magbangon S","Magbangon S","Magbangon N",
+                   "Magbangon S","Magbangon S","Magbangon S")
+
+# Put the Magbangon info together into a dataframe
+Mag_df <- as.data.frame(cbind(year_vec, dive_num_vec, rep_anem_vec, rep_anem_site), stringsAsFactors=FALSE) %>% 
+  rename(year = year_vec, dive_num = dive_num_vec, anem_id = rep_anem_vec, site = rep_anem_site)
+
+#for 2012, dive_num 12 and 13 both on 5/10/2012 - put 12 as S and 13 as N b/c Cabatoan site was done first, then 12, then 13 so seems likely MLP moved north
+#for 2012, dive_num 11.1 is right after a dive in Cabatoan on the same date (like starts a minute later), so put as S
+#in 2013, dive_num 25 has no anems with numbers but also no visibility recorded
+#2016, dive_num 37 has NA for anems - only a 9-min dive but has a vis recorded..., dive_table_id is 321, earlier dive in the day is 320
+#Mag_info <- left_join(Mag_repanem, Mag_df, by="anem_id")
+
+# Add this info back into the regular data frame
+dives <- rename(dives, org_site = site) %>%
+  mutate(site = rep(NA, length(dive_table_id))) #rename original site column so can make a new site column
+
+# Go through dives, put in N-S Magbangon site if the year and dive_num matches, otherwise put in the original site
+for(i in 1:length(dives$dive_table_id)) {
+  test_year = as.character(dives$year[i])
+  test_dive_num = as.character(dives$dive_num[i])
+  match = 0
+  
+  for(j in 1:length(Mag_df$year)){
+    if(Mag_df$year[j] == test_year & Mag_df$dive_num[j] == test_dive_num) {
+      match = j  #check if the year/dive num combo matches one of the Magbangon dives
+    }
+    
+    if(match !=0){
+      dives$site[i] = Mag_df$site[match]
+    } else {
+      dives$site[i] = dives$org_site[i]
+    }
+  }
+}
+  
 ##### Find average vis per year by site
-# Convert ranges (like "2 to 3" entered into the database to numbers (either max, min, or average of range))
-dives_visClean_db <- convertVisRangeToNum(dive_db, vis_convert, 'avgV') %>%
-  select(date, site, year, visibility_m_clean)
-dives_visClean_2018 <- convertVisRangeToNum(dives_2018, vis_convert, 'avgV') %>%
-  select(date, site, year, visibility_m_clean)
+# # Convert ranges (like "2 to 3" entered into the database to numbers (either max, min, or average of range))
+# dives_visClean_db <- convertVisRangeToNum(dive_db, vis_convert, 'avgV') %>%
+#   select(date, site, year, visibility_m_clean)
+# dives_visClean_2018 <- convertVisRangeToNum(dives_2018, vis_convert, 'avgV') %>%
+#   select(date, site, year, visibility_m_clean)
+# 
+# # Combine database and 2018 data
+# dives_visClean <- rbind(dives_visClean_db, dives_visClean_2018)
 
-# Combine database and 2018 data
-dives_visClean <- rbind(dives_visClean_db, dives_visClean_2018)
+
+#is there a way to get a list of anems that are in north Magbangon and south Magbangon?
+
+dives_visClean <- convertVisRangeToNum(dives, vis_convert, 'avgV')
 
 # Average by day to get one vis obs per day 
 dives_dailyAvg <- dives_visClean %>% 
@@ -98,23 +197,57 @@ dives_annualAvg <- dives_dailyAvg %>%
   group_by(year, site) %>%
   summarise(avg_vis = mean(daily_avg_vis, na.rm = TRUE), min_vis = min(daily_avg_vis, na.rm = TRUE), max_vis = max(daily_avg_vis, na.rm = TRUE), ndays = n())
 
+dives_visC <- dives_visClean %>% 
+  select(visibility_m_clean, year, site)
+
+dives_vis <- rbind(dives_visC, Mag2add)
+
 # Find average vis per year by site, not averaging over day first (just averaging all dives)
-dives_Avg <- dives_visClean %>%
+dives_Avg <- dives_vis %>%
   group_by(year, site) %>%
   summarise(avg_vis = mean(visibility_m_clean, na.rm = TRUE))
 
 # Replace Cab and Mag vis in 2017 (currently NA b/c no full sampling dives there)
 dives_Avg <- dives_Avg %>%
-  mutate(avg_vis = ifelse((year == 2017 & site == "Cabatoan"), Cab2017vis, avg_vis)) %>%
-  mutate(avg_vis = ifelse((year == 2017 & site == "Magbangon"), Mag2017vis, avg_vis))
+  mutate(avg_vis = ifelse((year == 2017 & site == "Cabatoan"), Cab2017vis, avg_vis)) 
+  #mutate(avg_vis = ifelse((year == 2017 & site == "Magbangon N"), Mag2017vis, avg_vis)) %>%
+  #mutate(avg_vis = ifelse((year == 2017 & site == "Magbangon S"), Mag2017vis, avg_vis)) 
+  #mutate(avg_vis = ifelse((year == 2018 & site == "Magbangon N"), MagN2018vis, avg_vis))
+
+# Create entries for Magbangon N in 2017 and 2018 and Magbangon S in 2017 (when didn't dive) 
+# Mag2017and18 <- data.frame(year = integer(3), site = character(3), avg_vis = numeric(3), stringsAsFactors = FALSE)
+# Mag2017and18$year[1:3] = c(2017, 2017, 2018)
+# Mag2017and18$site[1:3] = c("Magbangon N","Magbangon S","Magbangon N")
+# Mag2017and18$avg_vis[1:3] = c(Mag2017vis, Mag2017vis, MagN2018vis)
+# Mag2017and18 <- Mag2017and18 %>% mutate(year = as.integer(year))
+
+Mag2add <- data.frame(visibility_m_clean = double(3), year = integer(3), site = character(3), stringsAsFactors = FALSE)
+Mag2add$visibility_m_clean[1:3] = c(Mag2017vis, Mag2017vis, MagN2018vis)
+Mag2add$year[1:3] = c(2017, 2017, 2018)
+Mag2add$site[1:3] = c("Magbangon N","Magbangon S","Magbangon N")
+
+# dives_Avg <- rbind(dives_Avg, Mag2017and18)
+# 
+# dives_test <- dives_Avg[1,]
+# 
+# test2 <- rbind(dives_test, Mag2017and18)
+# 
 
 dives_annualAvg <- dives_annualAvg %>% 
   mutate(avg_vis = ifelse((year == 2017 & site == "Cabatoan"), Cab2017vis, avg_vis)) %>%
   mutate(min_vis = ifelse((year == 2017 & site == "Cabatoan"), Cab2017vis, min_vis)) %>%
-  mutate(max_vis = ifelse((year == 2017 & site == "Cabatoan"), Cab2017vis, max_vis)) %>%
-  mutate(avg_vis = ifelse((year == 2017 & site == "Magbangon"), Mag2017vis, avg_vis)) %>%
-  mutate(min_vis = ifelse((year == 2017 & site == "Magbangon"), Mag2017vis, min_vis)) %>%
-  mutate(max_vis = ifelse((year == 2017 & site == "Magbangon"), Mag2017vis, max_vis)) 
+  mutate(max_vis = ifelse((year == 2017 & site == "Cabatoan"), Cab2017vis, max_vis)) #%>%
+  # mutate(avg_vis = ifelse((year == 2017 & site == "Magbangon N"), Mag2017vis, avg_vis)) %>%
+  # mutate(min_vis = ifelse((year == 2017 & site == "Magbangon N"), Mag2017vis, min_vis)) %>%
+  # mutate(max_vis = ifelse((year == 2017 & site == "Magbangon N"), Mag2017vis, max_vis)) %>%
+  # mutate(avg_vis = ifelse((year == 2017 & site == "Magbangon S"), Mag2017vis, avg_vis)) %>%
+  # mutate(min_vis = ifelse((year == 2017 & site == "Magbangon S"), Mag2017vis, min_vis)) %>%
+  # mutate(max_vis = ifelse((year == 2017 & site == "Magbangon S"), Mag2017vis, max_vis)) %>%
+  # mutate(avg_vis = ifelse((year == 2018 & site == "Magbangon N"), MagN2018vis, avg_vis)) %>%
+  # mutate(min_vis = ifelse((year == 2018 & site == "Magbangon N"), MagN2018vis, min_vis)) %>%
+  # mutate(max_vis = ifelse((year == 2018 & site == "Magbangon N"), MagN2018vis, max_vis)) 
+
+
   
 #################### Plots! ####################
 #mean vis for Albuera sites, all dives counted as individual obs, not averaged by date first
