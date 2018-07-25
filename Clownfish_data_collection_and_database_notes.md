@@ -46,3 +46,11 @@
 # 2018 Field Season
 * See Safety and Emergency Protocols document [here](https://docs.google.com/document/d/1vFxBrV9YBi0idd4ExpuBzn4b2sYEQj6c2PCNpdQUjik/edit?usp=sharing)
 * Details of 2018 field protocols, events, and decisions [here](https://docs.google.com/document/d/1RWzReRgfI9JXVbHDzfd09vE_4pidfr-m5ykRP_T-Q7M)
+* did NOT record every anemone systematically this year
+* Used maps underwater to target known anemones and parts of reef
+* Despite hard searching, often could not find a tag or an anemone. Tag and anemone loss rates appear high.
+* Some sites lost all APCL and/or all anemones (Poroc San Flower, Gabas), Hicgop lost fish and anemones DURING field season
+* Saw wrasses eating eggs while clownfish being tagged
+* Fish this year seemed more stressed after being handled
+
+
