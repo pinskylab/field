@@ -13,12 +13,35 @@
 # 2013 Field Season
 
 # 2014 Field Season
+* MRS did not regularly record empty anemones (especially Sitio Baybayon, Wangag, Palanas) due to miscommunication with MLP.
+* Temperature loggers set to log every 30 min, but the pair was not offset by 15 min as in other years
+* Impression that we missed the large clownfish on anemones because they would hide
 
 # 2015 Field Season
+* Two field seasons! January (surveys only) and May (surveys and collections)
+* Northern Magbangon has an enormous number of anemones and A. clarkii
+* January: first PIT tags deployed
+* May: only went to the 5 anemones that Shem knows about at Visca, rather than a broader swim
+* May: dredging the river by Palanas and Magbangon: poor visibility
+* May: began using metal anemone tags
 
 # 2016 Field Season
+* PIT tag reader housing problems; GPS malfunction problems
+* DiveInfo sheet Notes indicates when anemone survey was not complete (e.g., bad viz, fast dive, etc.)
+* Tony trained Michelle, Malin, and Cecil on catching clownfish
+* We probably missed many small APCL: got scared while catching
+* MRS impression that too many fish came in at once, and weren’t matched well to anemone
+
 
 # 2017 Field Season
+* Time spent on deploying/retrieving oceanographic drifters and tilt current meter
+* Settlement monitoring and relocation trial experiment
+* KC notes would frequently record tagged anemone, but not the # of fish or their sizes
+* KC notes frequently did not record sizes of non-APCL species
+* Magbangon and Cabatoan were never diveable: too much sediment from the rivers
+* Haina is really big; found new area with really good coral. outside the “hull” we had drawn
+* Many new anemones tagged
+* New survey system: anemone surveyor (KC), catcher (GS), processor (MRS). Two datasheets: one for surveyor, one for processor.
 
 # 2018 Field Season
 * See Safety and Emergency Protocols document [here](https://docs.google.com/document/d/1vFxBrV9YBi0idd4ExpuBzn4b2sYEQj6c2PCNpdQUjik/edit?usp=sharing)
