@@ -20,6 +20,7 @@
 
 # 2012 Field Season
 * Tail colors only designated as O, W, Y. Y includes both YR and YP, based on size (min Y fish = 3.1 cm, max = 11.8 cm).
+* Anemones were only tagged at Visca, though APCL were sampled and caught at other sites.
 
 # 2013 Field Season
 
@@ -50,9 +51,10 @@
 * KC notes frequently did not record sizes of non-APCL species
 * Magbangon and Cabatoan were never diveable: too much sediment from the rivers
 * Haina is really big; found new area with really good coral. outside the “hull” we had drawn
-* Many new anemones tagged
+* Many new anemones tagged 
+* Some replacement of plastic anemone tags with metal tags (if anemone still had APCL) even if both plastic tags were present
 * New survey system: anemone surveyor (KC), catcher (GS), processor (MRS). Two datasheets: one for surveyor, one for processor.
-*
+
 # 2018 Field Season
 * See Safety and Emergency Protocols document [here](https://docs.google.com/document/d/1vFxBrV9YBi0idd4ExpuBzn4b2sYEQj6c2PCNpdQUjik/edit?usp=sharing)
 * Details of 2018 field protocols, events, and decisions [here](https://docs.google.com/document/d/1RWzReRgfI9JXVbHDzfd09vE_4pidfr-m5ykRP_T-Q7M)
@@ -62,5 +64,6 @@
 * Some sites lost all APCL and/or all anemones (Poroc San Flower, Gabas), Hicgop lost fish and anemones DURING field season
 * Saw wrasses eating eggs while clownfish being tagged
 * Fish this year seemed more stressed after being handled
+* Protocol to re-tag tagged anemones with APCL with only plastic tags with metal tags (even if both plastic tags were still present), though might not have been completely consistently applied.
 
 
