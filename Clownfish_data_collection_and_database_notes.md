@@ -7,6 +7,17 @@
 * Some fish have some orange on their tails but not clear that they are a breeding male. In 2018, Joyce (JJO) noted these fish with OLOT (orange line on tail) in the notes. Not sure how they were recorded in previous years.
 * In 2012, fish were only marked as O, W, or Y (so no YP or YR distinction). Based on the sizes of fish marked Y (min=3.1, max=11.8 cm), looks like both YR and YP included in Y.
 
+## Anemone tags
+* Winter 2015 field season was an anemone survey season where all anemones with APCL seen were tagged with plastic anemone tags - two tags, one on each side of the anemone
+* Starting in spring 2015, newly-tagged anemones were tagged with metal anemone tags, rather than plastic ones. If only one plastic anemone tag remained on a previously-tagged anemone and the anemone still had APCL on it, the tag was replaced with a new tag, which was metal starting in spring 2015.
+* Tags 2001 and above are metal. Tags below 2000 are plastic.
+* Starting in 2018 and somewhat in 2017, tagged anemones that had APCL and were only tagged with a plastic tag were re-tagged with a metal tag, with the tag_id of the plastic tag noted as an old_anem_id when readable.
+
+## Site hulls
+* Site hulls were created by Mario and Malin using GPS swim data from 2012-2014 seasons
+* In later seasons, new areas of sites (particularly Haina and Sitio Baybayon) were found outside of the hulls and sampled.
+* Michelle created maps of the sites based on hulls to guide sampling in 2018 field season.
+
 # 2012 Field Season
 * Tail colors only designated as O, W, Y. Y includes both YR and YP, based on size (min Y fish = 3.1 cm, max = 11.8 cm).
 
@@ -32,7 +43,6 @@
 * We probably missed many small APCL: got scared while catching
 * MRS impression that too many fish came in at once, and weren’t matched well to anemone
 
-
 # 2017 Field Season
 * Time spent on deploying/retrieving oceanographic drifters and tilt current meter
 * Settlement monitoring and relocation trial experiment
@@ -42,7 +52,7 @@
 * Haina is really big; found new area with really good coral. outside the “hull” we had drawn
 * Many new anemones tagged
 * New survey system: anemone surveyor (KC), catcher (GS), processor (MRS). Two datasheets: one for surveyor, one for processor.
-
+*
 # 2018 Field Season
 * See Safety and Emergency Protocols document [here](https://docs.google.com/document/d/1vFxBrV9YBi0idd4ExpuBzn4b2sYEQj6c2PCNpdQUjik/edit?usp=sharing)
 * Details of 2018 field protocols, events, and decisions [here](https://docs.google.com/document/d/1RWzReRgfI9JXVbHDzfd09vE_4pidfr-m5ykRP_T-Q7M)
