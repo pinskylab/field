@@ -8,6 +8,7 @@
 * In 2012, fish were only marked as O, W, or Y (so no YP or YR distinction). Based on the sizes of fish marked Y (min=3.1, max=11.8 cm), looks like both YR and YP included in Y.
 
 ## Anemone tags
+* old_anem_id = If an anemone had only one plastic tag, that tag number was recorded in the old_tag column and a new tag number was assigned to the anemone.  From 2014-2015_01, this replacement consisted of paired plastic tags.  From 2015_06 to present day, the replacement is a single metal tag.
 * Winter 2015 field season was an anemone survey season where all anemones with APCL seen were tagged with plastic anemone tags - two tags, one on each side of the anemone
 * Starting in spring 2015, newly-tagged anemones were tagged with metal anemone tags, rather than plastic ones. If only one plastic anemone tag remained on a previously-tagged anemone and the anemone still had APCL on it, the tag was replaced with a new tag, which was metal starting in spring 2015.
 * Tags 2001 and above are metal. Tags below 2000 are plastic.
