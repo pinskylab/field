@@ -21,6 +21,7 @@
 # 2012 Field Season
 * Tail colors only designated as O, W, Y. Y includes both YR and YP, based on size (min Y fish = 3.1 cm, max = 11.8 cm).
 * Anemones were only tagged at Visca, though APCL were sampled and caught at other sites.
+* All dives were transect dives, this information is not preserved through divetype in the database.
 
 # 2013 Field Season
 
