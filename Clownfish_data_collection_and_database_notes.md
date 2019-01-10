@@ -23,8 +23,8 @@
 * Anemones were only tagged at Visca, though APCL were sampled and caught at other sites.
 * All dives were transect dives, this information is not preserved through divetype in the database.
 * None of the dives were linear fish survey dives, this information is not preserved through divetype in the database.
-* The excel file has a column called NumSwaths in the SurveyInfo sheet, all values are 1 and this column was not used in future years so it was dropped from the database.
-
+* The excel file, SurveyInfo sheet has a column called NumSwaths in the SurveyInfo sheet, all values are 1 and this column was not used in future years so it was dropped from the database.
+# The excel file, Data sheet has a column called OnSwath.  All values are zero and this column was not included in the database.
 
 # 2013 Field Season
 
