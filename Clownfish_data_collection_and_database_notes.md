@@ -47,6 +47,7 @@
 * Tony trained Michelle, Malin, and Cecil on catching clownfish
 * We probably missed many small APCL: got scared while catching
 * MRS impression that too many fish came in at once, and weren’t matched well to anemone
+* We captured fewer tagged fish than expected so in the fall of 2016, Malin, Olaf and I practiced tagging on life giant gold fish and learned to turn the needle inside the fish to prevent the tag falling out of the tagging hole.
 
 # 2017 Field Season
 * Time spent on deploying/retrieving oceanographic drifters and tilt current meter
@@ -58,6 +59,9 @@
 * Many new anemones tagged 
 * Some replacement of plastic anemone tags with metal tags (if anemone still had APCL) even if both plastic tags were present
 * New survey system: anemone surveyor (KC), catcher (GS), processor (MRS). Two datasheets: one for surveyor, one for processor.
+* At times KC and MS were very far apart from each other to the point that it took ~20 minutes to find each other.  They did not encounter anemones at the same time.
+* The clown-sightings table was created to hold fish that KC saw and were recorded on the anemone data sheet, a different method than previous years.
+* When G_S and MRS swam close together, sometimes the same fish would be caught multiple times because it was not a fish that should be clipped and so G_S would not know that it had been caught.  This happened less often in 2017 because they did not swim near each other.
 
 # 2018 Field Season
 * See Safety and Emergency Protocols document [here](https://docs.google.com/document/d/1vFxBrV9YBi0idd4ExpuBzn4b2sYEQj6c2PCNpdQUjik/edit?usp=sharing)
@@ -69,5 +73,6 @@
 * Saw wrasses eating eggs while clownfish being tagged
 * Fish this year seemed more stressed after being handled
 * Protocol to re-tag tagged anemones with APCL with only plastic tags with metal tags (even if both plastic tags were still present), though might not have been completely consistently applied.
+* Quirky year because recording non-APCL anemones and fish was less comprehensive, not main 
 
 
