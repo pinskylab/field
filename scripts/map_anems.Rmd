@@ -1,0 +1,82 @@
+---
+title: "Map anemones from 2012"
+output: html_notebook
+---
+
+Many anems in 2012 lack anem_ids.  I need to know where they are so that I can determine how to split the dive between N and S Magbangon so I need to plot the locations on the map.
+
+```{r}
+source("scripts/field_helpers.R")
+
+leyte <- read_db("Leyte")
+
+# pull dives for date range
+  dive <- leyte %>% 
+    tbl("diveinfo") %>% 
+    select(dive_table_id, date, site, gps) %>% 
+    rename(unit = gps) %>% 
+    collect() %>% 
+    filter(grepl("2012", date), 
+           site == "Magbangon")
+  
+  anem <- leyte %>% 
+    tbl("anemones") %>% 
+    # get only anemones that were observed during our desired dive
+    filter(dive_table_id %in% dive$dive_table_id) %>% 
+    # reduce the number of columns - these anemones don't have anem_ids, so not including that column
+    select(dive_table_id, anem_table_id, obs_time) %>%
+    collect() 
+ 
+   anem <- left_join(anem, dive, by = "dive_table_id") 
+  rm(dive)
+  
+  anem <- anem %>% 
+    mutate(date_time = force_tz(ymd_hms(stringr::str_c(date, obs_time, sep = " ")),tzone = "Asia/Manila")) %>% 
+  # convert times to UTC
+  mutate(gpx_time = with_tz(date_time, tzone = "UTC"))
+  
+   anem <- anem %>% 
+    mutate(month = month(gpx_time), 
+      day = day(gpx_time), 
+      hour = hour(gpx_time), 
+      min = minute(gpx_time), 
+      sec = second(gpx_time), 
+      year = year(gpx_time))
+  
+ # get table of lat lon data ####
+  gpx <- leyte %>% 
+    tbl("GPX") %>% 
+    filter(unit %in% anem$unit, ) %>% 
+    collect() %>% 
+     filter(grepl("2012", time)) %>% 
+    mutate(month = month(time), 
+      day = day(time), 
+      hour = hour(time), 
+      min = minute(time), 
+      sec = second(time), 
+      year = year(time), 
+      lat = as.character(lat), # to prevent from importing as factors
+      lon = as.character(lon), 
+      time = as.character(time)) 
+  
+  #### WAIT ####
+  
+    # find matches for times to assign lat long - there are more than one set of seconds (sec.y) that match
+  temp <- left_join(anem, gpx, by = c("unit", "month", "day", "hour", "min", "year")) %>%
+    mutate(lat = as.numeric(lat), 
+      lon = as.numeric(lon)) %>% 
+    select(-contains("sec"))
+
+    # calculate a mean lat lon for each anem observation (currently there are 4 because a reading was taken every 15 seconds)
+  coord <- temp %>%
+    group_by(anem_table_id) %>% # id should be referring to one row of the data
+    summarise(mlat = mean(lat, na.rm = TRUE),
+      mlon = mean(lon, na.rm = T))   
+  
+anem <- left_join(anem, coord, by = "anem_table_id") %>% 
+  select(anem_table_id, mlat, mlon)
+
+readr::write_csv(anem, path = "2012_mag_anems.csv")
+   
+```
+
