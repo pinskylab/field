@@ -5,7 +5,9 @@ HOBO temperature loggers are positioned off the coast of Visca and replaced ever
 
 Clean the hobos by running under water and scrubbing with a test tube brush. If they resist, let them dry out for a month or a year and try again.
 
-Download software for the HOBOs [Windows](https://www.onsetcomp.com/files/software/hoboware/HOBOware_Free_Setup.exe) [Mac](https://www.onsetcomp.com/files/software/hoboware/HOBOware_Free_Installer.dmg)
+Download software for the HOBOs
+[Windows](https://www.onsetcomp.com/files/software/hoboware/HOBOware_Free_Setup.exe)
+[Mac](https://www.onsetcomp.com/files/software/hoboware/HOBOware_Free_Installer.dmg)
 
 1.  Connect the base station to the computer.
 2.  Connect the hobo to the base station.
