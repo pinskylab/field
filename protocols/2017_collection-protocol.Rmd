@@ -18,16 +18,16 @@ Team backs off until anemone surveyor has a chance to observe.
 
 **Fish catcher**:  
 
-1. waits for flagging tape to indicate anemone is ready for fish capture, ok to chase fish if they fled the area?  
+1. waits for flagging tape to indicate anemone is ready for fish capture, ok to chase fish if they fled the area.
 2. catches all fish of desired size range and places in holding vessel adjacent to anemone  
 3. can move on to next anemone if anemone surveyor has flagged it
 
 **Fish processing team (2 people)**:  
 
 once the fish catcher has moved to the next anemone, begins processing fish in the holding vessel  
-1. measure the fish and photograph on the gridded slate  
+1. measure the fish and photograph on the gridded slate using SeaLife Camera 2.0HD. 
 2. Record size and tail color  
-3. Scan for pit tag, if present, record and release fish  
+3. Scan for pit tag using Biomark 601 PIT tag reader, if tag is present, record and release fish
 4. If no pit tag is present,  
       1. collect fin clip and record sample id  
      2. insert pit tag and record tag id  
