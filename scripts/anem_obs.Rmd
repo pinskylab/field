@@ -4,33 +4,43 @@ output: html_notebook
 ---
 #Setup 
 ```{r setup}
+# load libraries
 library(tidyverse)
-source("../genomics/scripts/field_helpers.R")
-source("../genomics/scripts/lab_helpers.R")
-leyte <- write_db("Leyte")
-```
 
+# load functions
+source("~/db-connections.R")
+source("https://raw.githubusercontent.com/pinskylab/clownfishr/master/R/field-data-funs.R")
+source("https://raw.githubusercontent.com/pinskylab/clownfishr/master/R/gen-data-funs.R")
+source("https://raw.githubusercontent.com/pinskylab/clownfishr/master/R/lab-data-funs.R")
 
-```{r anem_table}
-# find  anem_ids
-anem <- leyte %>% 
+# connect to database
+leyte <- read_db("Leyte")
+
+# load data
+anem_db <- leyte %>% 
   tbl("anemones") %>%
   collect()
 ```
+
+
 **The past method**
 # which anemones already have an anem_obs number?
 ```{r}
-have_obs <- anem %>% 
+have_obs <- anem_db %>% 
   filter(!is.na(anem_obs)) %>% 
   select(anem_id, anem_obs) %>% 
-  mutate(anem_obs = as.integer(anem_obs)) %>% 
   distinct() %>% 
   arrange(anem_id)
 ```
 # attach anem_obs to any new anem observations that have been seen before, can only do this by removing and reattaching anem_obs
 ```{r}
-all_anem <- select(anem, -anem_obs)
+all_anem <- select(anem_db, -anem_obs)
 all_anem <- left_join(all_anem, have_obs, by = "anem_id")
+
+# if some rows were duplicated
+dups <- all_anem %>% 
+  group_by(anem_table_id) %>% 
+  filter(n() > 1)
 ```
 
 # which of these have an old_anem_id but no anem_obs?
