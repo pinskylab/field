@@ -1,0 +1,17 @@
+Designing a data sheet/data entry file
+
+The data sheet and the data entry file should be as similar to each other as possible.
+
+## Google sheets has been a great way to enter data.  
+
+### Pros  
+- backed up in the cloud with version control  
+- multiple people can enter data simultaneously into one file  
+- Can make available offline **in advance**
+
+### Cons  
+- need internet connectivity to co-work on document
+- need internet connectivity to pull data into R with script, otherwise need to plan ahead before losing internet.
+
+The google sheet we've been using in the Leyte project has some **data validation** built in to catch data entry errors.
+This is done by selecting the column, click on data, then data validation.  In the popup, in the Criteria box, choose list from a range, and select the range from the codes sheet.  For example, for dive_type on the diveinfo sheet, for the criteria, I entered codes!B33:B39.
