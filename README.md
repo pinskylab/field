@@ -18,3 +18,14 @@ The "weird things that happen in the field" is kept in the [clownfish-group-deci
 
 [scripts](scripts) contains scripts in order to import data, prepare it for making maps, and check the data for errors.  
 
+# Each night while in the field
+1. Rinse electronics with fresh water, soak in a tub of fresh water if possible.  
+2. Replace sea water with ethanol in the fin clip tubes.  
+3. 1 person transfer the day's photos onto the photo usb hard drive.  
+4. 1 person transfer GPS gpx files onto laptop and push to the [github](data) field repo/data folder.  
+5. 1 person sync the pit scanner with laptop and push to the [github](data) field repo/data folder.  
+6. All available people enter data into the google spreadsheet, sync a copy with the [github](data) field repo/data folder once everyone is done for the night.  
+7. Run the 01checkxl.Rmd script to find common errors that occur during data entry.  
+8. Run the 02trimgpx.Rmd script to trim the gpx files down to only the times during survey.  
+9. Run the 03anemstoqgis.Rmd script to plot the anemones on the QGIS map.
+
