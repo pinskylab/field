@@ -5,20 +5,19 @@ library(tidyverse)
 library(stringr)
 source("scripts/field_helpers.R")
 
-get_from_google()
+# before running this script, PULL from github to make sure you have the most recent version of all of the data
 
-# # if no network
-# get_data_no_net()
-# load(clown_filename)
-# load(dive_filename)
+# # to load from files saved on your device
+clown <- read_csv("data/2018_clownfish.csv")
+dive <- read_csv("data/2018_diveinfo.csv")
 
 # include pit tag scanner output
-pitfile <- ("data/BioTerm.txt")
+pitfile <- "data/BioTerm.txt"
 #download file from first pit tag scanner (in use through 21 March 2018)
-oldpitfile <- ("data/BioTerm_old.txt") 
+oldpitfile <- "data/BioTerm_old.txt"
  
 
-problem <- data.frame()
+problem <- tibble()
 
 # ---------------------------------------------
 #   adjust formatting ####
@@ -31,51 +30,51 @@ clown <- filter(clown, !is.na(dive_num))
 # ---------------------------------------------
 #   check the diveinfo sheet for type-o's #### don't need to do this because using data validation in the spreadsheet
 # ---------------------------------------------
-sites <- c("Palanas", "Wangag", "Magbangon", "Cabatoan", "Caridad Cemetery", "Caridad Proper", "Hicgop", "Hicgop South", "Sitio Tugas", "Elementary School", "Sitio Lonas", "San Agustin", "Poroc San Flower", "Poroc Rose", "Visca", "Gabas", "Tamakin Dacot", "Haina", "Sitio Baybayon")
-good <- filter(dive, site %in% sites)
-bad <- anti_join(dive, good)
-bad <- filter(bad, !is.na(divenum))
-if (nrow(bad) > 0){
-  bad$typeo <- "fix site spelling on diveinfo table"
-}
-(problem <- rbind(problem, bad))
-rm(good, bad)
+# sites <- c("Palanas", "Wangag", "Magbangon", "Cabatoan", "Caridad Cemetery", "Caridad Proper", "Hicgop", "Hicgop South", "Sitio Tugas", "Elementary School", "Sitio Lonas", "San Agustin", "Poroc San Flower", "Poroc Rose", "Visca", "Gabas", "Tamakin Dacot", "Haina", "Sitio Baybayon")
+# good <- filter(dive, site %in% sites)
+# bad <- anti_join(dive, good)
+# bad <- filter(bad, !is.na(divenum))
+# if (nrow(bad) > 0){
+#   bad$typeo <- "fix site spelling on diveinfo table"
+# }
+# (problem <- rbind(problem, bad))
+# rm(good, bad)
 
 # ---------------------------------------------
-#   check the clownfish sheet for type-o's
+#   check the clownfish sheet for type-o's #### don't need to do this if using data validation
 # ---------------------------------------------
-# check anem species
-anems <- c("ENQD", "STME", "HECR", "HEMG", "STHD", "HEAR", "MADO", "HEMA", "STGI", "????", "EMPT")
-good <- filter(clown, anem_spp %in% anems)
-bad <- anti_join(clown, good)
-bad <- bad %>% 
-  filter(!is.na(anem_spp), anem_spp != "")
-if (nrow(bad) > 0){
-  bad$typeo <- "fix anem spp on anem table"
-}
-(problem <- rbind(problem, bad))
-rm(good, bad)
-
-# Check fish species #### don't need to do this because using data validation in the spreadsheet
-# check fish species
-fish <- c("APCL", "APOC", "APPE", "APSA", "APFR", "APPO", "APTH", "PRBI", "NA")
-good <- filter(clown, fish_spp %in% fish)
-bad <- anti_join(clown, good)
-bad <- filter(bad, !is.na(fish_spp), fish_spp != "")
-if (nrow(bad) > 0){
-  bad$typeo <- "fix fish spp on fish table"
-}
-(problem <- rbind(problem, bad))
-
-# check tail colors
-colors <- c("YE", "O", "YR", "YP", "Y", "W", "WR", "WP", "BW", "B")
-good <- filter(clown, color %in% colors)
-bad <- anti_join(clown, good)
-bad <- filter(bad, !is.na(color), color != "")
-if (nrow(bad) > 0){
-  bad$typeo <- "fix tail color on fish table"
-}
-(problem <- rbind(problem, bad))
+# # check anem species
+# anems <- c("ENQD", "STME", "HECR", "HEMG", "STHD", "HEAR", "MADO", "HEMA", "STGI", "????", "EMPT")
+# good <- filter(clown, anem_spp %in% anems)
+# bad <- anti_join(clown, good)
+# bad <- bad %>% 
+#   filter(!is.na(anem_spp), anem_spp != "")
+# if (nrow(bad) > 0){
+#   bad$typeo <- "fix anem spp on anem table"
+# }
+# (problem <- rbind(problem, bad))
+# rm(good, bad)
+# 
+# # Check fish species #### don't need to do this because using data validation in the spreadsheet
+# # check fish species
+# fish <- c("APCL", "APOC", "APPE", "APSA", "APFR", "APPO", "APTH", "PRBI", "NA")
+# good <- filter(clown, fish_spp %in% fish)
+# bad <- anti_join(clown, good)
+# bad <- filter(bad, !is.na(fish_spp), fish_spp != "")
+# if (nrow(bad) > 0){
+#   bad$typeo <- "fix fish spp on fish table"
+# }
+# (problem <- rbind(problem, bad))
+# 
+# # check tail colors
+# colors <- c("YE", "O", "YR", "YP", "Y", "W", "WR", "WP", "BW", "B")
+# good <- filter(clown, color %in% colors)
+# bad <- anti_join(clown, good)
+# bad <- filter(bad, !is.na(color), color != "")
+# if (nrow(bad) > 0){
+#   bad$typeo <- "fix tail color on fish table"
+# }
+# (problem <- rbind(problem, bad))
 
 # are there anemone observations with ids that are missing data?
 # incmplt_anem <- clown %>% 
@@ -134,7 +133,7 @@ if (nrow(bad) > 0){
     select(dive_num, obs_time, tag_id, fin_id, notes) %>% 
     filter(!is.na(fin_id) | !is.na(tag_id)))
 
-# if this is zero,
+# if this is zero rows,
 rm(lack) # if it is not zero, look into what is going on on the data sheet
 
 # are there missing anemone tag numbers on the clownfish sheet?  #### - begin with the starting anem number for this field season
@@ -161,29 +160,29 @@ if (nrow(bad) > 0){
 # are there anemones listed at a different site than they were in other years? Don't include new tags - in 2018 2938 was first tag ####
 google_dive <- dive
 
-#   # field use
-# load("data/db_backups/anemones_db.Rdata")
-#  anem_db <- anem %>% 
-#     select(anem_table_id, dive_table_id, anem_id) %>%
-#     filter(!is.na(anem_id), anem_id != "-9999", anem_id != "NULL") %>%
-#   mutate(dive_table_id = as.numeric(dive_table_id))
-# 
-#  load("data/db_backups/diveinfo_db.Rdata")
-#   dive_db <- dive %>%
-#     select(dive_table_id, site) 
-#   rm(dive)
+  # field use
+load("data/db_backups/anemones_db.Rdata")
+ anem_db <- anem %>%
+    select(anem_table_id, dive_table_id, anem_id) %>%
+    filter(!is.na(anem_id), anem_id != "-9999", anem_id != "NULL") %>%
+  mutate(dive_table_id = as.numeric(dive_table_id))
 
-# # lab use
-leyte <- read_db("Leyte")
-anem_db <- leyte %>% 
-  tbl("anemones") %>% 
-  select(anem_table_id, dive_table_id, anem_id) %>%
-  filter(!is.na(anem_id), anem_id != "-9999", anem_id != "NULL") %>%
-  collect()
-dive_db <- leyte %>% 
-  tbl("diveinfo") %>% 
-  select(dive_table_id, site) %>% 
-  collect()
+ load("data/db_backups/diveinfo_db.Rdata")
+  dive_db <- dive %>%
+    select(dive_table_id, site)
+  rm(dive)
+
+# # # back at Rutgers use
+# leyte <- read_db("Leyte")
+# anem_db <- leyte %>% 
+#   tbl("anemones") %>% 
+#   select(anem_table_id, dive_table_id, anem_id) %>%
+#   filter(!is.na(anem_id), anem_id != "-9999", anem_id != "NULL") %>%
+#   collect()
+# dive_db <- leyte %>% 
+#   tbl("diveinfo") %>% 
+#   select(dive_table_id, site) %>% 
+#   collect()
   
   
 anem_db <- left_join(anem_db, dive_db, by = "dive_table_id")
