@@ -5,6 +5,9 @@ library(tidyverse)
 library(stringr)
 source("scripts/field_helpers.R")
 
+# enter the number on the first anem id tag installed this year
+first_tag <- 2938
+
 # before running this script, PULL from github to make sure you have the most recent version of all of the data
 
 # # to load from files saved on your device
@@ -16,6 +19,8 @@ pitfile <- "data/BioTerm.txt"
 #download file from first pit tag scanner (in use through 21 March 2018)
 oldpitfile <- "data/BioTerm_old.txt"
  
+# download a copy of the sqlite database from https://github.com/pinskylab/leyteBuildDB/blob/master/leyte-db.sqlite and update the path to that file here:
+leyte <- src_sqlite("~/Documents/leyteBuildDB/leyte-db.sqlite")
 
 problem <- tibble()
 
@@ -158,46 +163,32 @@ if (nrow(bad) > 0){
 (problem <- rbind(problem, bad))
 
 # are there anemones listed at a different site than they were in other years? Don't include new tags - in 2018 2938 was first tag ####
-google_dive <- dive
 
-  # field use
-load("data/db_backups/anemones_db.Rdata")
- anem_db <- anem %>%
-    select(anem_table_id, dive_table_id, anem_id) %>%
-    filter(!is.na(anem_id), anem_id != "-9999", anem_id != "NULL") %>%
-  mutate(dive_table_id = as.numeric(dive_table_id))
+ # create a table of anem ids and sites
+anem_db <- leyte %>% 
+  tbl("anemones") %>%
+  select(anem_table_id, dive_table_id, anem_id) %>%
+  filter(!is.na(anem_id), anem_id != "-9999", anem_id != "NULL") %>%
+  collect() 
 
- load("data/db_backups/diveinfo_db.Rdata")
-  dive_db <- dive %>%
-    select(dive_table_id, site)
-  rm(dive)
+dive_db <- leyte  %>% 
+  tbl("diveinfo") %>% 
+  select(dive_table_id, site) %>% 
+  collect()
 
-# # # back at Rutgers use
-# leyte <- read_db("Leyte")
-# anem_db <- leyte %>% 
-#   tbl("anemones") %>% 
-#   select(anem_table_id, dive_table_id, anem_id) %>%
-#   filter(!is.na(anem_id), anem_id != "-9999", anem_id != "NULL") %>%
-#   collect()
-# dive_db <- leyte %>% 
-#   tbl("diveinfo") %>% 
-#   select(dive_table_id, site) %>% 
-#   collect()
-  
-  
-anem_db <- left_join(anem_db, dive_db, by = "dive_table_id")
-anem_site <- anem_db %>%
+anem_site <- left_join(anem_db, dive_db, by = "dive_table_id") %>%
   select(anem_id, site) %>%
   distinct() %>% 
-  rename(old_site = site)
+  rename(old_site = site) %>% 
+  mutate(anem_id = as.integer(anem_id))
 
-  # compile a list of anemones with sites from this year
-  anem <- clown %>% 
+# compile a list of anemones with sites from this year
+anem <- clown %>% 
     select(dive_num, anem_id) %>% 
-    filter(!is.na(anem_id), anem_id != "-9999", anem_id < 2938) %>% 
+    filter(!is.na(anem_id), anem_id != "-9999", anem_id < first_tag) %>% 
     distinct() %>% 
     mutate(anem_id = as.character(anem_id))
-  dive <- google_dive
+ 
   
   new_anem_site <- left_join(anem, dive, by = "dive_num") %>% 
     select(dive_num, anem_id, site) %>% 

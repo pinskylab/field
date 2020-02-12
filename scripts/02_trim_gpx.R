@@ -3,8 +3,6 @@
 # ---------------------------------------------
 library(tidyverse) # for pipe functions
 library(lubridate) # for changing time zones
-
-library(stringr) # for combining dates and times into dttm
 source("scripts/readGPXGarmin.R")
 source("scripts/writeGPXGarmin.R")
 source("scripts/field_helpers.R")
@@ -14,18 +12,9 @@ source("scripts/field_helpers.R")
 # ---------------------------------------------
 #   import and format diveinfo
 # ---------------------------------------------
-# surv <- excl("diveinfo", NULL)
 
-get_from_google()
-
-# # if no network
-# get_data_no_net()
-# load(clown_filename)
-# load(dive_filename)
-
-
-surv <- dive
-names(surv) <- stringr::str_to_lower(names(surv))
+surv <- read_csv("data/2018_diveinfo.csv")
+names(surv) <- str_to_lower(names(surv))
 
 # Combine date and time to form a dttm column and set the time zone to PHT, Asia/Manila 
 surv <- surv %>% 
